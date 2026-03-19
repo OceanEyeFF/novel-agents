@@ -33,9 +33,10 @@
 - 不得擅自改 canon
 
 ### 5. Critic（批评审校）
-- 检查逻辑、节奏、OOC、设定冲突
+- 先检查结构闸门，再检查逻辑、节奏、OOC、设定冲突
 - 结构化输出：问题级别 + 类型 + 建议动作
 - 与 Writer 隔离
+- 未通过结构闸门时，不得给出“通过”
 
 ### 6. Archivist（档案官）
 - 场景结束后更新状态层
@@ -120,8 +121,9 @@
 2. Character Director 产出角色约束
 3. Writer 写场景
 4. Critic 审核
-5. 通过 → Archivist 归档
-6. 不通过 → 局部重写
+5. Guard 检查章节边界与审批链
+6. 通过 → Archivist 归档
+7. 不通过 → 局部重写 / 拆文 / 重新挂接 Beat
 
 ### 外循环：写一章/一卷
 1. Architect 检查章节弧光目标
@@ -175,7 +177,14 @@ Architect 章纲 → 人工批准 → 进入 scene planning
 影响 canon 的变更 → 人工批准
 
 ### Gate 3：发布审批
-Critic + 人工终审
+Critic + Guard + 人工终审
+
+### Gate 0：结构闸门（新增）
+任何正文在进入内容审核前，必须先验证：
+- 文件名 / 标题 / `chapter_id` / `scene_id` 一致
+- 一个文档只归属于一个章节或一个 Scene
+- 正文、摘要、评审报告是分离产物
+- 引用的 scene beat 已批准
 
 ---
 
