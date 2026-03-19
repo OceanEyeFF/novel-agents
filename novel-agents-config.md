@@ -109,16 +109,16 @@ deny:
 ```yaml
 name: critic
 role: 批评审校
-description: 检查逻辑/节奏/OOC/设定冲突，输出结构化评审
+description: 先检查结构完整性，再检查逻辑/节奏/OOC/设定冲突，输出结构化评审
 
 read:
-  - drafts/scenes/current     # 待审场景
+  - drafts/scenes/current     # 待审场景（必须能唯一映射到 chapter_id / scene_id）
   - states/characters/*       # 角色状态（对照 OOC）
   - states/open_loops/*       # 伏笔表（检查泄露）
   - canon/*                   # 设定（检查冲突）
 
 write:
-  - reviews/*                 # 写评审报告
+  - reviews/*                 # 写评审报告（必须包含 gate_a_result / decision / required_action）
 
 deny:
   - drafts/*                  # 禁止改正文
@@ -200,3 +200,25 @@ deny:
 这个配置需要翻译成 OpenClaw 的实际 agent 配置格式。你知道 OpenClaw 的 agent 配置具体怎么写吗（比如 yaml/json 格式、tool allowlist 字段名）？
 
 或者我先查一下文档？
+
+## 审批补充规则
+
+### Critic 结构闸门（Gate A）
+
+Critic 在写任何“通过”结论之前，必须先检查：
+
+- 文件名、标题、`chapter_id`、`scene_id` 一致
+- 文档只归属于一个章节 / 一个 Scene
+- 未混入章节摘要、下章预告、其他场景正文
+- 引用的 scene beat 已批准
+
+若 Gate A 失败，Critic 只能输出 `需修改` / `需重写` / `需拆分`，不得输出“通过”。
+
+### Archivist Guard Checklist
+
+Archivist 归档前必须再次确认：
+
+- 评审报告存在且 `decision = approved`
+- `gate_a_result = pass`
+- 正文与评审的目标 ID 一致
+- 归档对象不是混合章节文档
