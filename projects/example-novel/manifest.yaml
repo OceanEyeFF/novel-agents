@@ -1,0 +1,14 @@
+novel_id: example-novel
+name: 示例小说
+language: zh-CN
+workspace_root: projects/example-novel/workspace
+source_of_truth: github
+publish:
+  channel: clawskills
+  package: writer-room/example-novel
+  version: 0.2.0
+release:
+  git_commit: <fill-at-release-time>
+  package: writer-room/example-novel
+  version: 0.2.0
+  target_runtime: openclaw

@@ -15,6 +15,8 @@ metadata:
 
 从小说世界的各个角落检索相关信息，支撑上下文组装。
 
+> 执行前提：必须先锁定 `novel_id`，默认只检索 `projects/{{novel_id}}/workspace/` 内的数据，禁止隐式跨书召回。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -87,17 +89,17 @@ metadata:
 ## 检索来源
 
 ### 固定层（始终可查）
-- `canon/bible.md` - 核心设定
-- `canon/characters/` - 角色基础设定
+- `projects/{{novel_id}}/workspace/canon/bible.md` - 核心设定
+- `projects/{{novel_id}}/workspace/canon/characters/` - 角色基础设定
 
 ### 动态状态层
-- `states/characters/*.md` - 角色动态状态
-- `states/timeline/index.md` - 时间线
-- `states/open_loops/index.md` - 伏笔表
+- `projects/{{novel_id}}/workspace/states/characters/*.md` - 角色动态状态
+- `projects/{{novel_id}}/workspace/states/timeline/index.md` - 时间线
+- `projects/{{novel_id}}/workspace/states/open_loops/index.md` - 伏笔表
 
 ### 内容层
-- `summaries/chapter-*.md` - 章节摘要
-- `drafts/scenes/draft-*.md` - 草稿正文
+- `projects/{{novel_id}}/workspace/summaries/chapter-*.md` - 章节摘要
+- `projects/{{novel_id}}/workspace/drafts/scenes/draft-*.md` - 草稿正文
 
 ## 四层检索策略
 
@@ -121,10 +123,10 @@ metadata:
 问题: 写表白场景前，需要召回之前所有暗示感情的场景
 
 检索:
-1. states/characters/林小羽.md - 查看她对男主的态度变化
-2. states/characters/李明.md - 查看他对林小羽的态度变化
-3. states/open_loops/index.md - 看看有哪些伏笔可以回收
-4. summaries/chapter-*.md - 快速浏览之前章节的甜度曲线
+1. projects/{{novel_id}}/workspace/states/characters/林小羽.md - 查看她对男主的态度变化
+2. projects/{{novel_id}}/workspace/states/characters/李明.md - 查看他对林小羽的态度变化
+3. projects/{{novel_id}}/workspace/states/open_loops/index.md - 看看有哪些伏笔可以回收
+4. projects/{{novel_id}}/workspace/summaries/chapter-*.md - 快速浏览之前章节的甜度曲线
 ```
 
 ### 示例2: 检查角色OOC
@@ -133,9 +135,9 @@ metadata:
 问题: 写林小羽突然冷漠，需要确认这是否符合人设
 
 检索:
-1. canon/characters/林小羽.md - 基础性格设定
-2. states/characters/林小羽.md - 最近的动态
-3. drafts/scenes/ - 最近3个场景中她的表现
+1. projects/{{novel_id}}/workspace/canon/characters/林小羽.md - 基础性格设定
+2. projects/{{novel_id}}/workspace/states/characters/林小羽.md - 最近的动态
+3. projects/{{novel_id}}/workspace/drafts/scenes/ - 最近3个场景中她的表现
 ```
 
 ## 注意事项

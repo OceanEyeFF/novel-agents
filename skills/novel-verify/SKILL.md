@@ -15,6 +15,8 @@ metadata:
 
 验证小说内容的质量：先检查结构完整性，再检查角色一致性（OOC）、Canon 冲突、信息泄露、文风漂移。
 
+> 执行前提：必须先锁定 `novel_id`，审核输入与评审输出都必须绑定当前小说工作区。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -84,12 +86,12 @@ metadata:
    ```
 2. **读取相关状态文件**
    ```text
-   read: states/characters/{{角色名}}.md
-   read: states/open_loops/index.md
+   read: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
+   read: projects/{{novel_id}}/workspace/states/open_loops/index.md
    ```
 3. **读取 Canon**
    ```text
-   read: canon/bible.md
+   read: projects/{{novel_id}}/workspace/canon/bible.md
    ```
 4. **对比检查**
    - 对照角色状态，检查行为/语言是否一致
@@ -97,7 +99,7 @@ metadata:
    - 对照伏笔表，检查是否泄露
 5. **输出评审报告**
    ```text
-   write: reviews/review-{{场景ID}}.md
+   write: projects/{{novel_id}}/workspace/reviews/review-{{场景ID}}.md
    ```
 
 ## 一票否决条件

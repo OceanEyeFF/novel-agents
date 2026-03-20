@@ -15,6 +15,8 @@ metadata:
 
 管理小说核心设定（Canon Bible），所有创作必须遵循的事实。
 
+> 执行前提：必须先锁定 `novel_id`，所有读写只允许发生在 `projects/{{novel_id}}/workspace/` 内。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -26,8 +28,8 @@ metadata:
 
 ## 文件位置
 
-- `canon/bible.md` - 核心设定（世界观、剧情主线、文风、禁止事项）
-- `canon/characters/` - 各角色基础设定
+- `projects/{{novel_id}}/workspace/canon/bible.md` - 当前小说的核心设定（世界观、剧情主线、文风、禁止事项）
+- `projects/{{novel_id}}/workspace/canon/characters/` - 当前小说的角色基础设定
 
 ## 常用操作
 
@@ -36,19 +38,19 @@ metadata:
 直接读取文件：
 
 ```
-read: canon/bible.md
+read: projects/{{novel_id}}/workspace/canon/bible.md
 ```
 
 ### 读取特定角色设定
 
 ```
-read: canon/characters/{{角色名}}.md
+read: projects/{{novel_id}}/workspace/canon/characters/{{角色名}}.md
 ```
 
 ### 列出所有角色
 
 ```
-exec: ls novel-workspace/canon/characters/
+exec: ls projects/{{novel_id}}/workspace/canon/characters/
 ```
 
 ## 数据结构

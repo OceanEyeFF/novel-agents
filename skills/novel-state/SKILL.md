@@ -15,6 +15,8 @@ metadata:
 
 管理角色状态、时间线、伏笔/承诺追踪。
 
+> 执行前提：必须先锁定 `novel_id`，所有状态文件都应写入 `projects/{{novel_id}}/workspace/states/`。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -28,7 +30,7 @@ metadata:
 ## 目录结构
 
 ```
-states/
+projects/{{novel_id}}/workspace/states/
 ├── characters/         # 角色状态
 │   ├── index.md       # 角色索引+关系矩阵
 │   └── {{角色名}}.md  # 角色动态状态
@@ -44,10 +46,10 @@ states/
 
 ```bash
 # 读取角色状态索引
-read: states/characters/index.md
+read: projects/{{novel_id}}/workspace/states/characters/index.md
 
 # 读取特定角色状态
-read: states/characters/{{角色名}}.md
+read: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
 ```
 
 ### 更新角色状态
@@ -62,20 +64,20 @@ read: states/characters/{{角色名}}.md
 
 ```bash
 # 编辑角色状态文件
-edit: states/characters/{{角色名}}.md
+edit: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
 ```
 
 ### 登记新情节点
 
 ```bash
 # 编辑伏笔表
-edit: states/open_loops/index.md
+edit: projects/{{novel_id}}/workspace/states/open_loops/index.md
 ```
 
 ### 查看时间线
 
 ```bash
-read: states/timeline/index.md
+read: projects/{{novel_id}}/workspace/states/timeline/index.md
 ```
 
 ## 数据结构

@@ -18,27 +18,46 @@
 
 ---
 
+## 🔐 先决条件：必须先确定 novel_id
+
+所有 Skill 在执行前都必须明确以下信息：
+
+- `novel_id`
+- `workspace_root`
+- 当前 `chapter_id` / `scene_id`（如适用）
+
+推荐解析方式：
+
+1. 读取 `projects/{{novel_id}}/manifest.yaml`
+2. 从 `workspace_root` 解析实际路径
+3. 所有后续读写都使用绝对根：`projects/{{novel_id}}/workspace/`
+
+如果缺少上述任一项，**应暂停任务，不得继续写文件**。
+
+---
+
 ## 📍 文件位置
 
-```
-novel-workspace/
-├── canon/                    # 核心设定
-│   ├── bible.md             # Canon Bible
-│   └── characters/          # 角色设定
-│       ├── 林小羽.md
-│       └── 李明.md
-├── plans/                   # 规划
-│   ├── arc/                 # 卷纲
-│   ├── chapter/              # 章纲
-│   └── scene/                # Scene Beats
-├── states/                  # 动态状态
-│   ├── characters/          # 角色状态
-│   ├── timeline/             # 时间线
-│   └── open_loops/          # 伏笔表
-├── drafts/scenes/           # 草稿
-├── reviews/                 # 评审报告
-├── summaries/               # 章节摘要
-└── snapshots/               # 快照
+```text
+projects/
+└── {{novel_id}}/
+    ├── manifest.yaml
+    └── workspace/
+        ├── canon/                    # 核心设定
+        │   ├── bible.md             # Canon Bible
+        │   └── characters/          # 角色设定
+        ├── plans/                   # 规划
+        │   ├── arc/                 # 卷纲
+        │   ├── chapter/             # 章纲
+        │   └── scene/               # Scene Beats
+        ├── states/                  # 动态状态
+        │   ├── characters/          # 角色状态
+        │   ├── timeline/            # 时间线
+        │   └── open_loops/          # 伏笔表
+        ├── drafts/scenes/           # 草稿
+        ├── reviews/                 # 评审报告
+        ├── summaries/               # 章节摘要
+        └── snapshots/               # 快照
 ```
 
 ---
@@ -47,20 +66,20 @@ novel-workspace/
 
 ### 1. 规划阶段
 
-```
+```text
 ① Architect 创建卷纲
-   novel-plan → 写 plans/arc/arc-{{卷号}}.md
+   novel-plan → 写 projects/{{novel_id}}/workspace/plans/arc/arc-{{卷号}}.md
 
 ② Architect 创建章纲
-   novel-plan → 写 plans/chapter/chapter-{{卷}}-{{章}}.md
+   novel-plan → 写 projects/{{novel_id}}/workspace/plans/chapter/chapter-{{卷}}-{{章}}.md
 
 ③ Scene Planner 拆解 Scene Beats
-   novel-plan → 写 plans/scene/scene-{{ID}}.md
+   novel-plan → 写 projects/{{novel_id}}/workspace/plans/scene/scene-{{ID}}.md
 ```
 
 ### 2. 创作阶段
 
-```
+```text
 ④ Writer 获取上下文
    novel-canon → 读取角色设定
    novel-plan → 读取当前 Scene Beats
@@ -69,7 +88,7 @@ novel-workspace/
 
 ⑤ Writer 写正文
    novel-draft → 创作/续写/过渡
-   写 drafts/scenes/draft-{{ID}}.md
+   写 projects/{{novel_id}}/workspace/drafts/scenes/draft-{{ID}}.md
 
 ⑥ Writer 自检
    novel-verify → 初步检查 OOC/Canon
@@ -77,10 +96,10 @@ novel-workspace/
 
 ### 3. 审核阶段
 
-```
+```text
 ⑦ Critic 审核
    novel-verify → 完整评审
-   写 reviews/review-{{ID}}.md
+   写 projects/{{novel_id}}/workspace/reviews/review-{{ID}}.md
 
 ⑧ 根据评审结果：
    - 通过 → ⑨ 归档
@@ -90,17 +109,26 @@ novel-workspace/
 
 ### 4. 归档阶段
 
-```
+```text
 ⑨ Archivist 归档
    novel-state → 更新角色状态
    novel-state → 更新时间线
    novel-state → 更新伏笔表
-   
+
 ⑩ 写章节摘要
-   写 summaries/chapter-{{ID}}.md
+   写 projects/{{novel_id}}/workspace/summaries/chapter-{{ID}}.md
 
 ⑪ 创建快照
    novel-snapshot → 创建章节快照
+```
+
+### 5. 发布阶段
+
+```text
+⑫ 选择待发布 Git commit
+⑬ 在 CI / 本地校验 Skill 包内容
+⑭ 发布到 clawskills.sh
+⑮ OpenClaw 安装指定版本并验证
 ```
 
 ---
@@ -127,67 +155,74 @@ novel-workspace/
 3. **内容层** - 章节摘要、最近场景（按需读取）
 4. **历史层** - 早期章节、伏笔（必要时召回）
 
+前提条件：上述检索都只能在**当前 `novel_id` 对应工作区内部**进行，禁止默认跨书扫描。
+
 ---
 
 ## ⚡ 常见操作速查
 
+### 读取 manifest
+```bash
+read: projects/{{novel_id}}/manifest.yaml
+```
+
 ### 查询角色当前状态
 ```bash
-read: states/characters/{{角色名}}.md
+read: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
 ```
 
 ### 查询伏笔情况
 ```bash
-read: states/open_loops/index.md
+read: projects/{{novel_id}}/workspace/states/open_loops/index.md
 ```
 
 ### 查询时间线
 ```bash
-read: states/timeline/index.md
+read: projects/{{novel_id}}/workspace/states/timeline/index.md
 ```
 
 ### 读取 Canon
 ```bash
-read: canon/bible.md
-read: canon/characters/{{角色名}}.md
+read: projects/{{novel_id}}/workspace/canon/bible.md
+read: projects/{{novel_id}}/workspace/canon/characters/{{角色名}}.md
 ```
 
 ### 读取当前 Scene Beats
 ```bash
-read: plans/scene/scene-{{ID}}.md
+read: projects/{{novel_id}}/workspace/plans/scene/scene-{{ID}}.md
 ```
 
 ### 读取最近正文
 ```bash
-read: drafts/scenes/draft-{{ID}}.md
+read: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{ID}}.md
 ```
 
 ### 写新 Scene Beats
 ```bash
-write: plans/scene/scene-{{ID}}.md
+write: projects/{{novel_id}}/workspace/plans/scene/scene-{{ID}}.md
 ```
 
 ### 写正文草稿
 ```bash
-write: drafts/scenes/draft-{{ID}}.md
+write: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{ID}}.md
 ```
 
 ### 更新角色状态
 ```bash
-edit: states/characters/{{角色名}}.md
+edit: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
 ```
 
 ### 创建评审报告
 ```bash
-write: reviews/review-{{ID}}.md
+write: projects/{{novel_id}}/workspace/reviews/review-{{ID}}.md
 ```
 
 ---
 
 ## 📊 状态流转
 
-```
-[章纲] → [Scene Beats] → [草稿] → [评审] → [归档] → [快照]
+```text
+[章纲] → [Scene Beats] → [草稿] → [评审] → [归档] → [快照] → [发布]
                             ↓
                       [需修改] → 回到 Scene Beats
                             ↓
@@ -203,3 +238,5 @@ write: reviews/review-{{ID}}.md
 3. **评审必须独立** - Critic 和 Writer 要分开
 4. **快照要及时** - 重要节点必须创建快照
 5. **检索要精准** - 先精确后扩大范围
+6. **工作区必须隔离** - 每本小说单独 `workspace_root`
+7. **发布优先于直连同步** - 生产环境优先安装 clawskills.sh 已发布版本
