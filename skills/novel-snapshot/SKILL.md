@@ -15,6 +15,8 @@ metadata:
 
 管理小说项目的版本快照，支持创建、回滚、对比。
 
+> 执行前提：必须先锁定 `novel_id`，快照只能包含当前 `projects/{{novel_id}}/workspace/` 下的文件。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -48,7 +50,7 @@ metadata:
 
 ```bash
 # 创建章节快照
-# 文件: snapshots/chapters/snapshot-{{时间戳}}-{{章节}}.md
+# 文件: projects/{{novel_id}}/workspace/snapshots/chapters/snapshot-{{时间戳}}-{{章节}}.md
 
 # 命名规范
 snapshot-{{类型}}-{{ID}}-{{YYYYMMDD}}
@@ -100,7 +102,7 @@ snapshot-{{类型}}-{{ID}}-{{YYYYMMDD}}
 
 1. **确认回滚点**
    ```
-   读取: snapshots/index.md
+   读取: projects/{{novel_id}}/workspace/snapshots/index.md
    找到目标快照ID
    ```
 
@@ -155,8 +157,8 @@ snapshot-{{类型}}-{{ID}}-{{YYYYMMDD}}
 ### 目录结构
 
 ```
-snapshots/
-├── index.md              # 快照索引
+projects/{{novel_id}}/workspace/snapshots/
+├── index.md              # 当前小说快照索引
 ├── chapters/            # 章节快照
 │   └── snapshot-{{...}}.md
 ├── plans/               # 规划快照

@@ -15,6 +15,8 @@ metadata:
 
 管理卷纲、章纲、Scene Beats 的创建与修改。
 
+> 执行前提：必须先锁定 `novel_id`，所有规划文件都应写入 `projects/{{novel_id}}/workspace/plans/`。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -27,7 +29,7 @@ metadata:
 ## 目录结构
 
 ```text
-plans/
+projects/{{novel_id}}/workspace/plans/
 ├── arc/                    # 卷纲
 │   └── arc-{{卷号}}.md
 ├── chapter/                # 章纲
@@ -72,36 +74,36 @@ plans/
 
 1. 复制模板:
 ```text
-read: plans/arc/arc-template.md
+read: projects/{{novel_id}}/workspace/plans/arc/arc-template.md
 ```
 
 2. 写入新卷纲:
 ```text
-write: plans/arc/arc-{{卷号}}.md
+write: projects/{{novel_id}}/workspace/plans/arc/arc-{{卷号}}.md
 ```
 
 ### 创建新章纲
 
 1. 复制模板:
 ```text
-read: plans/chapter/chapter-template.md
+read: projects/{{novel_id}}/workspace/plans/chapter/chapter-template.md
 ```
 
 2. 写入章纲:
 ```text
-write: plans/chapter/chapter-{{卷}}-{{章}}.md
+write: projects/{{novel_id}}/workspace/plans/chapter/chapter-{{卷}}-{{章}}.md
 ```
 
 ### 创建 Scene Beats
 
 1. 复制模板:
 ```text
-read: plans/scene/scene-beat-template.md
+read: projects/{{novel_id}}/workspace/plans/scene/scene-beat-template.md
 ```
 
 2. 写入 Scene:
 ```text
-write: plans/scene/scene-{{卷}}-{{章}}-{{序号}}.md
+write: projects/{{novel_id}}/workspace/plans/scene/scene-{{卷}}-{{章}}-{{序号}}.md
 ```
 
 ## Scene Beats 必需字段
@@ -126,9 +128,9 @@ write: plans/scene/scene-{{卷}}-{{章}}-{{序号}}.md
 
 ### 完整流程
 
-1. **Architect** 创建/修改卷纲 → `plans/arc/`
-2. **Architect** 创建/修改章纲 → `plans/chapter/`
-3. **Scene Planner** 拆解 scene beats → `plans/scene/`
+1. **Architect** 创建/修改卷纲 → `projects/{{novel_id}}/workspace/plans/arc/`
+2. **Architect** 创建/修改章纲 → `projects/{{novel_id}}/workspace/plans/chapter/`
+3. **Scene Planner** 拆解 scene beats → `projects/{{novel_id}}/workspace/plans/scene/`
 4. **Critic / Guard** 校验 ID 和顺序完整性 → 才能进入写作
 
 ## 规划检查清单

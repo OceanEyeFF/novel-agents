@@ -15,6 +15,8 @@ metadata:
 
 小说创作辅助工具，帮助 Writer Agent 更好地完成场景写作。
 
+> 执行前提：必须先锁定 `novel_id`，正文读写和续写参考只能来自 `projects/{{novel_id}}/workspace/`。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -40,7 +42,7 @@ metadata:
 
 ```bash
 # 读取最近写的内容作为参考
-read: drafts/scenes/draft-{{卷}}-{{章}}-{{序号}}.md
+read: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{卷}}-{{章}}-{{序号}}.md
 
 # 参考前面2-3段的风格
 # 关键指标：
@@ -86,13 +88,13 @@ read: drafts/scenes/draft-{{卷}}-{{章}}-{{序号}}.md
 1. **获取上下文**
    ```bash
    # 读取当前 scene beats
-   read: plans/scene/scene-{{ID}}.md
+   read: projects/{{novel_id}}/workspace/plans/scene/scene-{{ID}}.md
    
    # 读取角色状态
-   read: states/characters/{{角色名}}.md
+   read: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
    
    # 读取上一段正文（如果有）
-   read: drafts/scenes/draft-{{ID}}.md
+   read: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{ID}}.md
    ```
 
 2. **开始写作**
