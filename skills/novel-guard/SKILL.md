@@ -15,6 +15,8 @@ metadata:
 
 这是一个专门用于“放行前”做边界检查的 Skill。它不负责润色文本，而是负责阻止错误的文档进入审核通过或归档阶段。
 
+> 执行前提：必须先锁定 `novel_id`，所有检查对象与输出报告都必须绑定 `projects/{{novel_id}}/workspace/`。
+
 ## When to Use
 
 ✅ **USE this skill when:**
@@ -24,10 +26,22 @@ metadata:
 - Archivist 准备归档前
 - 怀疑出现了串章、混稿、标题错乱、错误批准
 
+## 输入与输出
+
+### 常见输入
+- `projects/{{novel_id}}/workspace/drafts/scenes/`
+- `projects/{{novel_id}}/workspace/drafts/bridges/`
+- `projects/{{novel_id}}/workspace/plans/scene/`
+- `projects/{{novel_id}}/workspace/plans/prose/`
+- `projects/{{novel_id}}/workspace/reviews/`
+
+### 输出报告
+- `projects/{{novel_id}}/workspace/reviews/guard-{{target_id}}.md`
+
 ## 守门目标
 
 1. **单文档单归属**：一个文档只能属于一个 `chapter_id` / `scene_id`。
-2. **元信息一致**：文件名、标题、正文头、引用的 Beat 必须一致。
+2. **元信息一致**：文件名、标题、正文头、引用的 Beat / Prose Brief 必须一致。
 3. **审批链闭环**：未完成结构检查的稿件不能被批准，也不能被归档。
 4. **摘要与正文分离**：章节摘要、审稿报告、正文必须是不同产物。
 
@@ -38,7 +52,7 @@ metadata:
 - [ ] 文件名包含目标 `chapter_id` / `scene_id`
 - [ ] 标题中的 ID 与文件名一致
 - [ ] 正文头中的 ID 与标题一致
-- [ ] `source_beat` 存在且属于相同章节
+- [ ] `source_beat` 与 `source_prose_brief` 存在且属于相同章节
 
 ### B. 范围一致性
 
@@ -52,7 +66,7 @@ metadata:
 - [ ] 结构检查已完成
 - [ ] 评审报告的 `review_target` 与正文一致
 - [ ] 决策字段存在且唯一
-- [ ] 若 decision ≠ approved，则禁止归档
+- [ ] 若 `decision ≠ approved`，则禁止归档
 
 ## 失败处理
 
@@ -71,7 +85,7 @@ metadata:
 
 ## Result
 - pass: yes / no
-- target_type: scene_draft / chapter_summary / review
+- target_type: scene_draft / bridge_draft / chapter_summary / review
 
 ## Findings
 | 类型 | 问题 | 严重度 | 建议动作 |
@@ -81,22 +95,6 @@ metadata:
 - allow_review: yes / no
 - allow_archive: yes / no
 ```
-
-## 典型拦截案例
-
-### 案例 1：章节标题错乱
-- 文件名是 `scene-01-03-02.md`
-- 文档标题却写成 `第4章`
-- **结论**：禁止送审，要求 `rename_or_reheader`
-
-### 案例 2：多章节混入一个文档
-- 正文前半是第 3 章 Scene 2
-- 后半插入第 4 章开头铺垫
-- **结论**：禁止通过，要求 `split_document`
-
-### 案例 3：Critic 直接给通过
-- 评审报告只检查 OOC，没有结构检查结果
-- **结论**：审批无效，要求补做 Gate A
 
 ## 注意事项
 

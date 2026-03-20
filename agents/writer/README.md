@@ -16,12 +16,13 @@
 
 Writer 开始写作前，必须已经拿到：
 
-1. 唯一的 `chapter_id`
-2. 唯一的 `scene_id`
-3. 当前 Scene Beat
-4. 当前 Prose Brief
-5. 涉及角色的最新状态
-6. 上一已批准场景或摘要（仅用于衔接，不得改写其归属）
+1. `novel_id`
+2. 唯一的 `chapter_id`
+3. 唯一的 `scene_id`
+4. 当前 Scene Beat
+5. 当前 Prose Brief
+6. 涉及角色的最新状态
+7. 上一已批准场景或摘要（仅用于衔接，不得改写其归属）
 
 如果以上任一缺失，必须停止写作并请求补全，而不是自行猜测。
 
@@ -34,6 +35,10 @@ Writer 开始写作前，必须已经拿到：
 ### 模式 2：Prose Expansion
 - 只做环境描写、动作细节、身体感受、内心活动、潜台词、段落节奏扩充
 - 不改变 scene 的结构功能和 reveal/hide 边界
+
+### 模式 3：Bridge Draft
+- 只负责相邻 Scene 之间的过桥、余波、呼吸段
+- 不得偷偷引入新剧情主事件
 
 ## 输出契约
 
@@ -66,5 +71,5 @@ Writer 开始写作前，必须已经拿到：
 
 ## 权限
 
-- 读: plans/scene, plans/prose, states/characters, canon/style
+- 读: plans/scene, plans/prose, states/characters, manifests/character_constraints, canon/style
 - 写: drafts/scenes, drafts/bridges

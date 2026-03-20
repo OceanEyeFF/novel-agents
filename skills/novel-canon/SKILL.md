@@ -1,6 +1,6 @@
 ---
 name: novel-canon
-description: 获取和管理小说核心设定（Canon Bible）。用于查询世界观、规则、禁止事项等不可违背的事实。
+description: 获取和管理小说核心设定（Canon Bible）。用于查询世界观、规则、文风模板、禁止事项等不可违背的事实。
 metadata:
   {
     "openclaw":
@@ -25,11 +25,13 @@ metadata:
 - 确认某设定是否已有明确规定
 - 需要引用 canon 中的禁止事项
 - 规划新情节时确认不冲突
+- 需要读取文风模板给 `prose_director` / `writer`
 
 ## 文件位置
 
 - `projects/{{novel_id}}/workspace/canon/bible.md` - 当前小说的核心设定（世界观、剧情主线、文风、禁止事项）
 - `projects/{{novel_id}}/workspace/canon/characters/` - 当前小说的角色基础设定
+- `projects/{{novel_id}}/workspace/canon/style/` - 文风模板、语言基准、节奏要求
 
 ## 常用操作
 
@@ -47,75 +49,20 @@ read: projects/{{novel_id}}/workspace/canon/bible.md
 read: projects/{{novel_id}}/workspace/canon/characters/{{角色名}}.md
 ```
 
+### 读取文风模板
+
+```
+read: projects/{{novel_id}}/workspace/canon/style/{{style_id}}.md
+```
+
 ### 列出所有角色
 
 ```
 exec: ls projects/{{novel_id}}/workspace/canon/characters/
 ```
 
-## 数据结构
+## 使用原则
 
-### Canon Bible 结构
-
-```markdown
-# Canon Bible - 核心设定
-
-## 世界观
-- **世界名称**: 
-- **时代背景**:
-- **主要地点**:
-- **核心规则**:
-
-## 剧情主线
-### 主线弧光
-1.
-2.
-3.
-
-### 关键情节点（不可更改）
-
-## 文风模板
-- 叙事视角:
-- 语言风格:
-- 节奏基准:
-
-## 禁止事项
-- 禁止出现:
-- 禁止改变:
-- 禁止违背:
-```
-
-### 角色设定结构
-
-```markdown
-# {{角色名}} - 基础设定
-
-## 基础信息
-| 字段 | 内容 |
-|------|------|
-| 名字 | |
-| 性别 | |
-| 年龄 | |
-| 身份/职业 | |
-| 初次登场 | 第X章 |
-
-## 性格
-### 核心特质
-### 语言风格
-### 习惯/小动作
-
-## 背景
-### 过去
-### 秘密
-### 动机/目标
-
-## 关系图
-| 角色 | 关系 | 状态 |
-|------|------|------|
-```
-
-## 注意事项
-
-1. **不可覆盖**: Canon 是事实，任何创作都不能违背
-2. **新增需谨慎**: 新增 canon 内容需确认不与现有冲突
-3. **版本追踪**: 重大变更应创建快照
+1. Canon 是事实，不是建议。
+2. 文风模板属于 canon 的一部分，供 `prose_director` / `writer` 参考，但不能被私自改写。
+3. 若发现正文与 canon 冲突，应先阻断生产，再由 Architect / 人工决策修订。

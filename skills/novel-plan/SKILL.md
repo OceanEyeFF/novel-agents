@@ -48,7 +48,7 @@ projects/{{novel_id}}/workspace/plans/
 - `sequence_index`
 - `status`
 
-### 章纲最小头信息
+## 章纲最小头信息
 
 ```markdown
 # Chapter Plan: {{chapter_id}}
@@ -58,7 +58,7 @@ projects/{{novel_id}}/workspace/plans/
 - status: approved
 ```
 
-### Scene Beat 最小头信息
+## Scene Beat 最小头信息
 
 ```markdown
 # Scene Beat: {{scene_id}}
@@ -66,44 +66,6 @@ projects/{{novel_id}}/workspace/plans/
 - scene_id: {{scene_id}}
 - sequence_index: {{序号}}
 - status: approved
-```
-
-## 常用操作
-
-### 创建新卷纲
-
-1. 复制模板:
-```text
-read: projects/{{novel_id}}/workspace/plans/arc/arc-template.md
-```
-
-2. 写入新卷纲:
-```text
-write: projects/{{novel_id}}/workspace/plans/arc/arc-{{卷号}}.md
-```
-
-### 创建新章纲
-
-1. 复制模板:
-```text
-read: projects/{{novel_id}}/workspace/plans/chapter/chapter-template.md
-```
-
-2. 写入章纲:
-```text
-write: projects/{{novel_id}}/workspace/plans/chapter/chapter-{{卷}}-{{章}}.md
-```
-
-### 创建 Scene Beats
-
-1. 复制模板:
-```text
-read: projects/{{novel_id}}/workspace/plans/scene/scene-beat-template.md
-```
-
-2. 写入 Scene:
-```text
-write: projects/{{novel_id}}/workspace/plans/scene/scene-{{卷}}-{{章}}-{{序号}}.md
 ```
 
 ## Scene Beats 必需字段
@@ -115,38 +77,27 @@ write: projects/{{novel_id}}/workspace/plans/scene/scene-{{卷}}-{{章}}-{{序�
 | Scene ID | S{{卷}}-{{章}}-{{序号}} |
 | Chapter ID | CH{{卷}}-{{章}} |
 | POV | 视角角色 |
+| Narrative Function | 本场景在章节中的叙事功能 |
 | Scene Goal | 场景目标 |
 | Conflict | 冲突 |
-| Reveal | 揭示的信息 |
-| Hide | 隐藏的信息 |
+| Reveal / Hide | 揭示与隐藏信息 |
 | 进入状态 | 角色进入状态 |
 | 退出状态 | 角色退出状态 |
-| Token Budget | 字数预算 |
+| Must Include | 本场必须出现的信息 / 动作 |
 | Must Not Include | 明确禁止写入的跨章信息 |
 
 ## 规划流程
 
-### 完整流程
-
 1. **Architect** 创建/修改卷纲 → `projects/{{novel_id}}/workspace/plans/arc/`
 2. **Architect** 创建/修改章纲 → `projects/{{novel_id}}/workspace/plans/chapter/`
-3. **Scene Planner** 拆解 scene beats → `projects/{{novel_id}}/workspace/plans/scene/`
+3. **Scene Planner** 拆解 Scene Beats → `projects/{{novel_id}}/workspace/plans/scene/`
 4. **Critic / Guard** 校验 ID 和顺序完整性 → 才能进入写作
+5. **Prose Director** 基于已批准的 Scene Beats 生成 Prose Brief
 
 ## 规划检查清单
 
 - [ ] 卷纲已确认
 - [ ] 章纲已确认
 - [ ] Scene beats 已创建
-- [ ] 每个 Scene 都有唯一 `scene_id`
-- [ ] 所有 Scene 的 `chapter_id` 一致且可追溯到章纲
-- [ ] 涉及角色已确认
-- [ ] 伏笔投放/回收已标记
-- [ ] `must_not_include` 已填写
-
-## 注意事项
-
-1. **顺序**: 必须先有卷纲，再有章纲，最后有 scene beats
-2. **一致性**: 规划内容不得违背 canon
-3. **可追溯**: 每次修改应有明确原因
-4. **防串章**: 若一个规划文件无法唯一映射到单一 `chapter_id`，该规划视为无效
+- [ ] `sequence_index` 连续无跳号
+- [ ] `must_not_include` 已写明边界
