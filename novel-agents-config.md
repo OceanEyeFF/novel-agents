@@ -1,6 +1,65 @@
-# Writer Room Agent 配置 v0.1
+# Writer Room Agent 配置 v0.2
 
-> 每个 agent 的角色定义 + 工具权限
+> 每个 agent 的角色定义、工具权限与状态机协作
+
+---
+
+## 0. Orchestrator（调度员）
+
+```yaml
+name: orchestrator
+role: 调度员
+description: 常驻中心管理，驱动章节状态机，决定调用谁、何时返工、何时升级人工
+
+read:
+  - all                 # 读取全部元信息、产物状态、审批链、日志
+
+write:
+  - logs/*              # 执行日志
+  - jobs/*              # 任务状态机记录
+  - manifests/*         # chapter / scene 流转清单
+
+state_machine:
+  - planned
+  - beat_ready
+  - prose_ready
+  - drafting
+  - review_failed_minor
+  - review_failed_major
+  - replan_required
+  - scene_approved
+  - chapter_assembling
+  - chapter_approved
+  - archived
+
+route_rules:
+  - if: missing_chapter_plan
+    then: architect
+  - if: missing_scene_beats
+    then: scene_planner
+  - if: missing_prose_brief
+    then: prose_director
+  - if: critic.required_action == fix_local_language
+    then: writer
+  - if: critic.required_action == expand_scene
+    then: writer
+  - if: critic.required_action == bridge_scenes
+    then: writer
+  - if: critic.required_action == rewrite_scene
+    then: writer
+  - if: critic.required_action == replan_scene
+    then: scene_planner
+  - if: critic.required_action == replan_chapter
+    then: architect
+  - if: critic.required_action == escalate_human
+    then: human_review
+
+deny:
+  - drafts/*            # 禁止直接写正文
+  - reviews/*           # 禁止直接写评审
+  - states/*            # 禁止直接改状态
+  - canon/*             # 禁止改设定
+```
 
 ---
 
@@ -11,25 +70,22 @@ name: architect
 role: 总规划师
 description: 维护全书弧光、卷纲、章纲，管控主题/高潮/节奏分布
 
-# 可读权限
 read:
-  - canon/*          # 全部 canon 设定
-  - plans/arc/*      # 卷纲
-  - plans/chapter/*  # 章纲
-  - states/characters/*   # 角色状态
-  - states/timeline/*     # 时间线
-  - states/open_loops/*  # 伏笔表
+  - canon/*
+  - plans/arc/*
+  - plans/chapter/*
+  - states/characters/*
+  - states/timeline/*
+  - states/open_loops/*
 
-# 可写权限
 write:
-  - plans/chapter/*  # 创建/修改章纲
-  - plans/arc/*      # 创建/修改卷纲
+  - plans/chapter/*
+  - plans/arc/*
 
-# 禁止操作
 deny:
-  - drafts/*         # 禁止写正文
-  - reviews/*        # 禁止写评审
-  - canon/create    # 禁止新建核心设定
+  - drafts/*
+  - reviews/*
+  - canon/create
 ```
 
 ---
@@ -39,20 +95,22 @@ deny:
 ```yaml
 name: character_director
 role: 角色导演
-description: 维护角色状态机，输出角色行动约束
+description: 维护角色状态机，输出角色行动约束、情绪边界、认知差
 
 read:
-  - states/characters/*   # 角色状态
-  - plans/chapter/current # 当前章节规划
-  - canon/characters/*    # 角色基础设定
+  - states/characters/*
+  - plans/chapter/current
+  - plans/scene/current
+  - canon/characters/*
 
 write:
-  - states/characters/*   # 更新角色状态
+  - states/characters/*
+  - manifests/character_constraints/*
 
 deny:
   - drafts/*
-  - plans/chapter/*       # 不允许改章纲
-  - canon/*              # 不允许改基础设定
+  - plans/chapter/*
+  - canon/*
 ```
 
 ---
@@ -62,163 +120,229 @@ deny:
 ```yaml
 name: scene_planner
 role: 场景策划
-description: 把章纲拆成 scene beats，控制每个场景的结构
+description: 把章纲拆成 scene beats，控制顺序、进入/退出状态与隐藏信息边界
 
 read:
-  - plans/chapter/current      # 当前章纲
-  - states/characters/current  # 当前章节涉及的角色状态
-  - states/open_loops/*       # 伏笔表
+  - plans/chapter/current
+  - states/characters/current
+  - states/open_loops/*
 
 write:
-  - plans/scene/*              # 创建 scene beats
+  - plans/scene/*
+
+required_fields:
+  - chapter_id
+  - scene_id
+  - sequence_index
+  - pov
+  - narrative_function
+  - scene_goal
+  - conflict
+  - reveal_or_hide
+  - entry_state
+  - exit_state
+  - must_include
+  - must_not_include
 
 deny:
   - drafts/*
-  - states/*                  # 不允许改状态
-  - canon/*                   # 不允许改设定
+  - states/*
+  - canon/*
 ```
 
 ---
 
-## 4. Writer（正文写手）
+## 4. Prose Director（小说导演）
+
+```yaml
+name: prose_director
+role: 小说导演
+description: 把 scene beats 翻译成 prose brief，指定叙述重心、慢写点、感官目标与段落节奏
+
+read:
+  - plans/scene/current
+  - manifests/character_constraints/*
+  - states/characters/current
+  - drafts/scenes/previous
+  - canon/style/*
+
+write:
+  - plans/prose/*
+
+required_fields:
+  - chapter_id
+  - scene_id
+  - emotional_core
+  - narrative_focus
+  - slow_beats
+  - sensory_targets
+  - inner_monologue_targets
+  - dialogue_purpose
+  - hidden_information
+  - paragraph_rhythm
+  - prose_length_plan
+
+deny:
+  - drafts/*
+  - plans/chapter/*
+  - states/*
+```
+
+---
+
+## 5. Writer（正文写手）
 
 ```yaml
 name: writer
 role: 正文写手
-description: 根据 scene beats 写 prose，保持局部文风
+description: 根据 prose brief 写 prose，先完成 skeleton，再执行 expansion 与 bridge 补写
 
 read:
-  - plans/scene/current              # 当前场景 beats
-  - states/characters/current        # 当前角色状态摘要
-  - drafts/scenes/previous          # 上一场景（参考风格）
-  - canon/style/*                    # 文风模板
+  - plans/scene/current
+  - plans/prose/current
+  - manifests/character_constraints/*
+  - states/characters/current
+  - drafts/scenes/previous
+  - canon/style/*
 
 write:
-  - drafts/scenes/*                 # 写场景草稿
+  - drafts/scenes/*
+  - drafts/bridges/*
+
+modes:
+  - draft_skeleton
+  - expand_prose
+  - bridge_scenes
 
 deny:
-  - states/*                        # 禁止改状态
-  - plans/*                         # 禁止改规划
-  - canon/*                         # 禁止改设定
+  - states/*
+  - plans/chapter/*
+  - canon/*
 ```
 
 ---
 
-## 5. Critic（批评审校）
+## 6. Critic（批评审校）
 
 ```yaml
 name: critic
 role: 批评审校
-description: 先检查结构完整性，再检查逻辑/节奏/OOC/设定冲突，输出结构化评审
+description: 先检查结构完整性，再检查逻辑/节奏/OOC/设定冲突，并评估文本密度与小说性
 
 read:
-  - drafts/scenes/current     # 待审场景（必须能唯一映射到 chapter_id / scene_id）
-  - states/characters/*       # 角色状态（对照 OOC）
-  - states/open_loops/*       # 伏笔表（检查泄露）
-  - canon/*                   # 设定（检查冲突）
+  - drafts/scenes/current
+  - drafts/bridges/*
+  - plans/scene/current
+  - plans/prose/current
+  - states/characters/*
+  - states/open_loops/*
+  - canon/*
 
 write:
-  - reviews/*                 # 写评审报告（必须包含 gate_a_result / decision / required_action）
+  - reviews/*
+
+required_scores:
+  - gate_a_result
+  - gate_b_result
+  - scene_density
+  - novelness
+  - chapter_cohesion
+  - decision
+  - required_action
+
+script_like_risk_rules:
+  threshold: 3
+  required_repairs:
+    - environment_anchor
+    - body_sensation
+    - inner_misread_or_association
+    - slow_beat
+    - texture_detail
+
+allow_required_action:
+  - fix_local_language
+  - expand_scene
+  - rewrite_scene
+  - bridge_scenes
+  - replan_scene
+  - replan_chapter
+  - escalate_human
 
 deny:
-  - drafts/*                  # 禁止改正文
-  - states/*                  # 禁止改状态
-  - plans/*                   # 禁止改规划
+  - drafts/*
+  - states/*
+  - plans/*
 ```
 
 ---
 
-## 6. Archivist（档案官）
+## 7. Archivist（档案官）
 
 ```yaml
 name: archivist
 role: 档案官
-description: 场景结束后更新状态层，写摘要，更新索引
+description: 场景或章节结束后更新状态层，写摘要、更新时间线、保存快照与索引
 
 read:
-  - drafts/scenes/approved    # 已批准的正文
-  - states/*                  # 当前全部状态
+  - drafts/scenes/approved
+  - drafts/bridges/approved
+  - reviews/*
+  - states/*
 
 write:
-  - states/characters/*       # 更新角色状态
-  - states/timeline/*         # 更新时间线
-  - states/open_loops/*       # 更新伏笔表
-  - summaries/chapters/*     # 写章节摘要
+  - states/characters/*
+  - states/timeline/*
+  - states/open_loops/*
+  - summaries/chapters/*
+  - snapshots/*
+
+archive_checks:
+  - review_exists
+  - decision_is_approved
+  - gate_a_result_is_pass
+  - target_ids_match
+  - artifact_is_not_mixed_chapter_doc
 
 deny:
-  - drafts/*                  # 禁止写正文
-  - plans/*                   # 禁止改规划
-  - canon/*                   # 禁止改设定
+  - drafts/*
+  - plans/*
+  - canon/*
 ```
 
 ---
 
-## 7. Orchestrator（调度员）
+## 工具映射表（v0.2）
 
-```yaml
-name: orchestrator
-role: 调度员
-description: 决定调用谁，监控质量，聚合结果
-
-read:
-  - all   # 读取全部（做路由决策）
-
-write:
-  - logs/*                    # 写执行日志
-
-deny:
-  - drafts/*                  # 禁止写正文
-  - reviews/*                 # 禁止写评审
-  - states/*                  # 禁止直接改状态
-  - canon/*                   # 禁止改设定
-```
-
----
-
-## 工具映射表
-
-| 工具 | architect | character_director | scene_planner | writer | critic | archivist |
-|------|-----------|-------------------|---------------|--------|--------|-----------|
-| get_canon | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ |
-| get_character_state | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| update_character_state | ❌ | ✅ | ❌ | ❌ | ❌ | ✅ |
-| get_timeline_window | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
-| register_plot_point | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| get_open_loops | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
-| create_chapter_plan | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| create_scene_beats | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
-| check_canon_conflict | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| check_character_consistency | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| check_style_drift | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
-| retrieve_relevant_memories | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| snapshot_scene | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| 工具 | orchestrator | architect | character_director | scene_planner | prose_director | writer | critic | archivist |
+|------|--------------|-----------|--------------------|---------------|----------------|--------|--------|-----------|
+| get_canon | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| get_character_state | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| update_character_state | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| get_timeline_window | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| register_plot_point | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| get_open_loops | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| create_chapter_plan | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| create_scene_beats | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| create_prose_brief | ✅ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| draft_scene_skeleton | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| expand_scene_prose | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| bridge_adjacent_scenes | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ |
+| check_canon_conflict | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| check_character_consistency | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| check_style_drift | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| score_scene_density | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| score_novelness | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| score_chapter_cohesion | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ |
+| retrieve_relevant_memories | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| snapshot_scene | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
-## 下一步
+## 人工审批策略
 
-这个配置需要翻译成 OpenClaw 的实际 agent 配置格式。你知道 OpenClaw 的 agent 配置具体怎么写吗（比如 yaml/json 格式、tool allowlist 字段名）？
+只在以下情况强制人工介入：
 
-或者我先查一下文档？
-
-## 审批补充规则
-
-### Critic 结构闸门（Gate A）
-
-Critic 在写任何“通过”结论之前，必须先检查：
-
-- 文件名、标题、`chapter_id`、`scene_id` 一致
-- 文档只归属于一个章节 / 一个 Scene
-- 未混入章节摘要、下章预告、其他场景正文
-- 引用的 scene beat 已批准
-
-若 Gate A 失败，Critic 只能输出 `需修改` / `需重写` / `需拆分`，不得输出“通过”。
-
-### Archivist Guard Checklist
-
-Archivist 归档前必须再次确认：
-
-- 评审报告存在且 `decision = approved`
-- `gate_a_result = pass`
-- 正文与评审的目标 ID 一致
-- 归档对象不是混合章节文档
+1. 首次章纲批准
+2. 重大设定变更
+3. 最终发布前抽检
+4. Critic / Orchestrator 输出 `escalate_human`
