@@ -9,6 +9,7 @@
 | Skill | 名称 | 功能 |
 |-------|------|------|
 | `novel-canon` | 📖 核心设定 | 读取/管理 Canon Bible、角色基础设定 |
+| `intake/bootstrap` | 🧭 准入启动 | 归纳对话、生成 `project.yaml` / `runtime.yaml`；建议先作为 preflight capability 验证 |
 | `novel-plan` | 📋 规划管理 | 创建卷纲、章纲、Scene Beats |
 | `novel-state` | 🔄 状态管理 | 角色动态状态、时间线、伏笔追踪 |
 | `novel-verify` | 🔍 质量验证 | OOC、Canon 冲突，信息泄露、文风漂移检查 |
@@ -24,13 +25,16 @@
 
 - `novel_id`
 - `workspace_root`
+- `project.yaml` 是否存在
+- `runtime.yaml` 是否存在
 - 当前 `chapter_id` / `scene_id`（如适用）
 
 推荐解析方式：
 
 1. 读取 `projects/{{novel_id}}/manifest.yaml`
-2. 从 `workspace_root` 解析实际路径
-3. 所有后续读写都使用绝对根：`projects/{{novel_id}}/workspace/`
+2. 校验 `projects/{{novel_id}}/project.yaml` 与 `projects/{{novel_id}}/workspace/runtime/runtime.yaml` 已就绪
+3. 从 `workspace_root` 解析实际路径
+4. 所有后续读写都使用绝对根：`projects/{{novel_id}}/workspace/`
 
 如果缺少上述任一项，**应暂停任务，不得继续写文件**。
 
@@ -42,7 +46,10 @@
 projects/
 └── {{novel_id}}/
     ├── manifest.yaml
+    ├── project.yaml
+    ├── intake/latest-summary.yaml
     └── workspace/
+        ├── runtime/runtime.yaml
         ├── canon/                    # 核心设定
         │   ├── bible.md             # Canon Bible
         │   └── characters/          # 角色设定
@@ -64,10 +71,23 @@ projects/
 
 ## 🔄 完整工作流
 
+### 0. 准入阶段
+
+```text
+⓪ briefing capability 归纳作者自然语言
+   写 projects/{{novel_id}}/intake/latest-summary.yaml
+
+⓪-1 bootstrap capability 生成状态契约
+   写 projects/{{novel_id}}/project.yaml
+   写 projects/{{novel_id}}/workspace/runtime/runtime.yaml
+```
+
 ### 1. 规划阶段
 
 ```text
-① Architect 创建卷纲
+① Orchestrator 读取 runtime.stage 并判断路由
+
+② Architect 创建卷纲
    novel-plan → 写 projects/{{novel_id}}/workspace/plans/arc/arc-{{卷号}}.md
 
 ② Architect 创建章纲
@@ -164,6 +184,16 @@ projects/
 ### 读取 manifest
 ```bash
 read: projects/{{novel_id}}/manifest.yaml
+```
+
+### 读取 project contract
+```bash
+read: projects/{{novel_id}}/project.yaml
+```
+
+### 读取 runtime contract
+```bash
+read: projects/{{novel_id}}/workspace/runtime/runtime.yaml
 ```
 
 ### 查询角色当前状态

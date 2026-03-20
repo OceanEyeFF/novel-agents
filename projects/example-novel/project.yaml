@@ -1,0 +1,21 @@
+project:
+  novel_id: example-novel
+  novel_name: 示例小说
+  version: v0.2
+  genre:
+    - 都市
+    - 校园
+    - 恋爱
+  target_platform: 番茄
+  target_audience: 泛二次元 16-30
+  style_profile:
+    narration_style: 第一人称轻喜剧
+    prose_density: medium
+    dialogue_ratio: 0.55
+    pacing: medium-fast
+  baseline:
+    canon_locked: true
+    theme: 笨拙亲密关系的建立
+    forbidden:
+      - 突然超自然展开
+      - 角色性格硬反转

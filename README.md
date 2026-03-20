@@ -2,7 +2,7 @@
 
 > 基于 OpenClaw 架构的多 Agent 协作叙事生产系统
 
-## 🎭 Agent 阵容（v0.2）
+## 🎭 执行层 Agent 阵容（v0.2）
 
 | Agent | 名称 | 职责 |
 |-------|------|------|
@@ -14,6 +14,17 @@
 | **writer** | 写手 | 按 prose brief 完成 skeleton + expansion |
 | **critic** | 审稿 | 检查结构错误、OOC、Canon 冲突、文本密度 |
 | **archivist** | 档案官 | 更新状态、写摘要、管理快照 |
+
+## 🧭 前台/入口能力（实验性，不计入核心 Room Agents）
+
+> 这两项更适合先作为 **preflight capabilities / orchestrator 子流程** 验证，而不是立刻提升为常驻 Room Agents。
+
+| Capability | 名称 | 当前定位 |
+|-----------|------|----------|
+| **briefing** | 立项澄清 | 对话式归纳已确认/未确认信息，判断是否具备准入条件 |
+| **bootstrap** | 启动包转换 | 把 intake summary 转成 `project.yaml` 与 `runtime.yaml`，形成状态契约 |
+
+在它们通过真实工作负载测试前，默认仍以现有 8 个执行层 Agent 作为核心房间编制。
 
 ## 🧰 Skills 组成
 
@@ -52,7 +63,7 @@
 
 ```text
 novel-agents/
-├── agents/                         # 8个岗位型 Agent 说明
+├── agents/                         # 8个执行岗位型 Agent 说明
 ├── skills/                         # 9个专用 Skills
 │   ├── novel-canon/
 │   ├── novel-plan/
@@ -67,7 +78,12 @@ novel-agents/
 ├── projects/                       # 多小说独立工作区（推荐）
 │   └── {{novel_id}}/
 │       ├── manifest.yaml
+│       ├── project.yaml            # Project Layer：长期约束
+│       ├── intake/
+│       │   └── latest-summary.yaml # Intake Layer：对话归纳
 │       └── workspace/
+│           └── runtime/
+│               └── runtime.yaml    # Runtime Layer：当前叙事/任务/调度状态
 └── workspace/                      # 工作区规范与模板说明
 ```
 
@@ -101,12 +117,13 @@ projects/
 
 ## 🚀 使用方式
 
-1. 配置 OpenClaw Agent
-2. 导入 Skills
-3. 创建 `projects/{{novel_id}}/manifest.yaml`
-4. 初始化该小说的独立工作区
-5. 以章节为生产单元执行：规划 → beats → prose brief → skeleton → expansion → 审核 → 组章 → 归档
-6. 将稳定版本发布到 clawskills.sh，供 OpenClaw 环境按版本安装和调试
+1. 通过 intake/briefing 子流程做对话式立项 / 任务澄清
+2. 生成 `projects/{{novel_id}}/intake/latest-summary.yaml`
+3. 由 bootstrap 子流程产出 `manifest.yaml`、`project.yaml`、`workspace/runtime/runtime.yaml`
+4. 配置 OpenClaw Agent 并导入 Skills
+5. 初始化该小说的独立工作区
+6. 以章节为生产单元执行：规划 → beats → prose brief → skeleton → expansion → 审核 → 组章 → 归档
+7. 将稳定版本发布到 clawskills.sh，供 OpenClaw 环境按版本安装和调试
 
 ## 🔄 推荐分发方式
 
@@ -124,7 +141,10 @@ projects/
 ## 📝 工作流（v0.2）
 
 ```text
-Orchestrator 确认 novel_id 与 workspace root
+作者自然语言输入
+→ briefing capability 归纳 confirmed / unresolved / decision rights
+→ bootstrap capability 生成 project.yaml + runtime.yaml
+→ Orchestrator 确认 novel_id、workspace root、runtime.stage
 → Architect 创建/修订章纲
 → Scene Planner 生成 scene beats
 → Prose Director 生成 prose brief
@@ -140,6 +160,7 @@ Orchestrator 确认 novel_id 与 workspace root
 - `novel-system-design.md`：v0.2 系统设计
 - `novel-agents-config.md`：岗位权限与工具映射
 - `docs/v0.2-architecture.md`：状态机、返工路由、技能接口草案
+- `docs/intake-and-state-contract.md`：对话式立项、准入流程、`project.yaml` / `runtime.yaml` 契约
 - `docs/distribution-and-publishing.md`：多小说隔离与发布策略
 - `workspace/README.md`：独立工作区结构规范
 - `workspace/tools-guide.md`：带 `novel_id` 的工具读写约定
@@ -152,3 +173,10 @@ MIT
 
 **Author**: OceanEyeFF  
 **系统**: OpenClaw Multi-Agent
+
+
+## 🧪 新能力落地原则
+
+- `briefing` / `bootstrap` 很重要，但**是否要升级成新的 Room Agents，需要先做讨论和真实 workload tests**。
+- 在验证前，建议把它们视为 **pre-orchestrator capabilities**，由 Orchestrator 或单独入口服务承载。
+- 只有当它们能稳定降低人工澄清次数、减少误启动、且不显著拖慢吞吐时，再考虑把它们升格为常驻 Agent。

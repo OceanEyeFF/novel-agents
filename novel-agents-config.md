@@ -1,6 +1,72 @@
 # Writer Room Agent 配置 v0.2
 
-> 每个 agent 的角色定义、工具权限与状态机协作
+> 每个执行层 agent 与实验性 preflight role 的角色定义、工具权限与状态机协作
+
+---
+
+## -2. Experimental Preflight Role：Briefing（立项澄清）
+
+```yaml
+name: briefing
+role: 立项澄清员
+description: 与作者对话，归纳 confirmed / unresolved / decision rights，并判断是否允许进入中台；默认视为实验性 preflight role
+
+read:
+  - projects/*/manifest.yaml
+  - canon/*
+  - summaries/*
+
+write:
+  - intake/*
+
+intake_states:
+  - idea_raw
+  - brief_partial
+  - brief_ready
+  - in_orchestrator
+
+required_output:
+  - intake_summary.confirmed
+  - intake_summary.unresolved
+  - intake_summary.next_recommended_step
+  - intake_summary.ready_for_backend
+
+deny:
+  - drafts/*
+  - reviews/*
+  - states/*
+```
+
+---
+
+## -1. Experimental Preflight Role：Bootstrap（启动包转换）
+
+```yaml
+name: bootstrap
+role: 启动包转换器
+description: 把 intake summary 转换为 project.yaml 与 runtime.yaml，形成中台状态契约；默认视为实验性 preflight role
+
+read:
+  - intake/*
+  - canon/*
+  - manifests/*
+
+write:
+  - projects/*/project.yaml
+  - projects/*/workspace/runtime/runtime.yaml
+
+required_output:
+  - project.style_profile
+  - project.baseline
+  - runtime.narrative_state
+  - runtime.task
+  - runtime.runtime
+
+deny:
+  - drafts/*
+  - reviews/*
+  - canon/*
+```
 
 ---
 
@@ -20,6 +86,10 @@ write:
   - manifests/*         # chapter / scene 流转清单
 
 state_machine:
+  - idea_raw
+  - brief_partial
+  - brief_ready
+  - in_orchestrator
   - planned
   - beat_ready
   - prose_ready
@@ -33,6 +103,10 @@ state_machine:
   - archived
 
 route_rules:
+  - if: missing_project_contract or missing_runtime_contract
+    then: bootstrap
+  - if: runtime.stage in [idea_raw, brief_partial]
+    then: briefing
   - if: missing_chapter_plan
     then: architect
   - if: missing_scene_beats

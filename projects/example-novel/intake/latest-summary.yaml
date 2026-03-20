@@ -1,0 +1,18 @@
+intake_summary:
+  confirmed:
+    - 这是一个偏轻喜剧的校园恋爱项目
+    - 当前要推进第一卷前期人物关系建立
+  assumed:
+    - 近期重点是暧昧感和误解感，而不是大事件
+  unresolved:
+    - 女主第一次主动示好的强度
+  blocked_by: []
+  decision_rights:
+    auto_allowed:
+      - 补局部环境细节
+      - 调整段落节奏
+    human_required:
+      - 修改角色核心设定
+      - 调整卷级主线
+  next_recommended_step: 进入第一章 scene 规划
+  ready_for_backend: true
