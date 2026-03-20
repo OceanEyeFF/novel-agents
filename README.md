@@ -161,6 +161,7 @@ projects/
 - `novel-agents-config.md`：岗位权限与工具映射
 - `docs/v0.2-architecture.md`：状态机、返工路由、技能接口草案
 - `docs/intake-and-state-contract.md`：对话式立项、准入流程、`project.yaml` / `runtime.yaml` 契约
+- `docs/idea-narrative-runtime-and-chapter-quality.md`：Narrative Runtime 与章节质量控制的双层设计提炼
 - `docs/distribution-and-publishing.md`：多小说隔离与发布策略
 - `workspace/README.md`：独立工作区结构规范
 - `workspace/tools-guide.md`：带 `novel_id` 的工具读写约定
