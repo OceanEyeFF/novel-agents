@@ -23,7 +23,12 @@
 projects/
 └── {{novel_id}}/
     ├── manifest.yaml              # 小说元信息与发布配置
+    ├── project.yaml               # 长期项目契约（题材、风格、baseline）
+    ├── intake/
+    │   └── latest-summary.yaml    # 对话式立项归纳
     └── workspace/
+        ├── runtime/               # 当前运行态
+        │   └── runtime.yaml
         ├── canon/                 # 核心设定（不可违背）
         │   ├── bible.md
         │   └── character-template.md
@@ -76,14 +81,17 @@ publish:
 
 ## 工作流
 
-### 0. 初始化阶段
-1. 创建 `projects/{{novel_id}}/manifest.yaml`
-2. 初始化 `projects/{{novel_id}}/workspace/`
-3. 校验 `workspace_root` 与实际路径一致
-4. 将 `novel_id` 写入任务上下文与运行日志
+### 0. Intake / Bootstrap 阶段
+1. 通过 intake / briefing 子流程生成 `projects/{{novel_id}}/intake/latest-summary.yaml`
+2. 创建 `projects/{{novel_id}}/manifest.yaml`
+3. 生成 `projects/{{novel_id}}/project.yaml`
+4. 初始化 `projects/{{novel_id}}/workspace/runtime/runtime.yaml`
+5. 校验 `workspace_root` 与实际路径一致
+6. 将 `novel_id` 写入任务上下文与运行日志
 
 ### 1. 规划阶段
-1. `Architect` 创建/修改卷纲 → `projects/{{novel_id}}/workspace/plans/arc/`
+1. `Orchestrator` 先读取 `runtime.stage`、`narrative_state`、`task`
+2. `Architect` 创建/修改卷纲 → `projects/{{novel_id}}/workspace/plans/arc/`
 2. `Architect` 创建/修改章纲 → `projects/{{novel_id}}/workspace/plans/chapter/`
 3. `Scene Planner` 拆解 scene beats → `projects/{{novel_id}}/workspace/plans/scene/`
 
@@ -134,7 +142,13 @@ publish:
 ## 状态流转
 
 ```text
-[章纲] → [Scene Beats] → [草稿] → [评审] → [归档] → [发布]
-                            ↓
-                      [需修改] → 回到 Scene Beats
+[对话 Intake] → [project.yaml / runtime.yaml] → [章纲] → [Scene Beats] → [草稿] → [评审] → [归档] → [发布]
+                                                           ↓
+                                                     [需修改] → 回到 Scene Beats / Bootstrap
 ```
+
+## 状态契约建议
+
+- `project.yaml`：保存题材、平台、目标读者、风格模板、baseline、禁区。
+- `workspace/runtime/runtime.yaml`：保存 `narrative_state`、`task`、`runtime` 三段。
+- `intake/latest-summary.yaml`：保存 confirmed / unresolved / 决策权限，用于回看为什么允许进入中台。

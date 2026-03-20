@@ -1,0 +1,49 @@
+narrative_state:
+  current_arc: 第一卷·相识
+  current_chapter: 1
+  current_scene: 1
+  pov_character: 周屿
+  active_characters:
+    - 周屿
+    - 林早
+  emotional_target: 尴尬中的好奇
+  narrative_function: 初见立印象 + 误会埋点
+  open_loops:
+    - 林早为什么会主动搭话
+  reveal_constraints:
+    must_not_reveal:
+      - 林早的真实动机
+    can_hint:
+      - 她认识周屿
+
+task:
+  task_id: chapter-01-scene-01
+  task_type: scene_generation
+  input_refs:
+    chapter_plan_id: chapter-01
+    scene_beat_id: scene-01-01
+  requirements:
+    min_length: 900
+    max_length: 1300
+    must_include:
+      - 教室环境锚点
+      - 周屿的错误解读
+    must_avoid:
+      - 直接解释林早动机
+      - 摘要式收束
+    quality_target:
+      density: high
+      immersion: high
+      plot_progress: medium
+
+runtime:
+  stage: planned
+  auto_flow: true
+  allow_replan: true
+  retry_policy:
+    max_retry: 2
+    escalate_on_fail: replan_scene
+  human_gate:
+    require_approval: false
+    approval_type: null
+  next_action_hint: call_architect

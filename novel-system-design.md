@@ -8,16 +8,58 @@
 
 **Writer Room OS** — 一个常驻的小说创作房间，而不是单次 prompt 包装器。
 
-v0.2 的目标不是继续细化单个 Scene 的功能流水线，而是把系统从“场景功能完成”升级为“章节导演制小说工坊”：
+v0.2 的目标不是继续细化单个 Scene 的功能流水线，而是把系统从“场景功能完成”升级为“章节导演制小说工坊”；同时在进入中台前，新增一个**对话式立项与任务澄清层**，把作者脑中的模糊想法转成可执行状态契约：
 
 - 以 **chapter** 作为核心生产单元，而不是孤立 scene。
 - 通过 **Prose Director** 把场景功能翻译成小说表达方案。
 - 通过 **Orchestrator** 自动推进内循环、状态机与返工决策。
 - 通过 **chapter assembly** 消除多 scene 并列导致的拼接感。
 
+
 ---
 
-## 二、8 Agent 结构
+## 二、前台准入层：Briefing + Bootstrap
+
+在正式进入 Orchestrator 状态机之前，系统先经过两步：
+
+1. **Briefing**：与作者对话，抽取项目身份、创作意图、设定基线、当前任务、决策权限。
+2. **Bootstrap**：把对话摘要转换为 `project.yaml` 与 `runtime.yaml`。
+
+> 这里先定义为 **前台能力 / preflight 子流程**，而不是立即把它们视作新的常驻 Room Agents。是否升格为独立 Agent，需要经过 workload tests 再决定。
+
+### Intake 准入状态
+
+- `idea_raw`：只有模糊想法，不能进入中台。
+- `brief_partial`：已有部分信息，但缺少关键约束。
+- `brief_ready`：信息足够，允许生成启动包。
+- `in_orchestrator`：已写入状态契约，进入中台执行。
+
+### Intake Summary 标准输出
+
+```yaml
+intake_summary:
+  confirmed:
+    - 已确认信息
+  assumed:
+    - 当前系统假设
+  unresolved:
+    - 仍待澄清的关键缺口
+  blocked_by:
+    - 导致不能进入中台的阻塞项
+  next_recommended_step: 先做卷纲规划
+  ready_for_backend: false
+```
+
+### State Contract 分层
+
+系统不再把长期设定、当前任务、运行时控制混在一个 YAML 里，而是拆为：
+
+- **Project Layer / `project.yaml`**：Canon 级、慢变信息、平台与风格基线。
+- **Runtime Layer / `runtime.yaml`**：`narrative_state`、`task`、`runtime` 三段，供 Orchestrator 和执行层 Agent 消费。
+
+---
+
+## 三、8 Agent 执行层结构
 
 ### 1. Orchestrator（调度员，主控）
 - 常驻中心管理 Agent，负责状态机推进
@@ -63,7 +105,7 @@ v0.2 的目标不是继续细化单个 Scene 的功能流水线，而是把系�
 
 ---
 
-## 三、生产状态机
+## 四、生产状态机
 
 ### Chapter 状态
 
@@ -93,7 +135,7 @@ Orchestrator 必须根据 `required_action` 把任务回退到正确层级，而
 
 ---
 
-## 四、权限分层
+## 五、权限分层
 
 | Agent | 可读 | 可写 | 不可写 |
 |-------|------|------|--------|
@@ -108,7 +150,7 @@ Orchestrator 必须根据 `required_action` 把任务回退到正确层级，而
 
 ---
 
-## 五、中间表示升级：从 Scene Beat 到 Prose Brief
+## 六、中间表示升级：从 Scene Beat 到 Prose Brief
 
 ### Scene Beat（规划层）
 
@@ -153,7 +195,7 @@ Orchestrator 必须根据 `required_action` 把任务回退到正确层级，而
 
 ---
 
-## 六、四层上下文设计（v0.2）
+## 七、四层上下文设计（v0.2）
 
 ### 1. 固定层
 - Canon Bible
@@ -182,7 +224,7 @@ Orchestrator 必须根据 `required_action` 把任务回退到正确层级，而
 
 ---
 
-## 七、双循环系统
+## 八、双循环系统
 
 ### 内循环：写一场 Scene
 1. Scene Planner 产出 beat
@@ -206,7 +248,7 @@ Orchestrator 必须根据 `required_action` 把任务回退到正确层级，而
 
 ---
 
-## 八、Chapter Assembly
+## 九、Chapter Assembly
 
 Chapter Assembly 不是单独的创作岗位，而是由 Orchestrator 管理的章级组装过程，目标是把“多个完成任务的 Scene”变成“连续可阅读的一章”。
 
@@ -220,7 +262,7 @@ Chapter Assembly 不是单独的创作岗位，而是由 Orchestrator 管理的�
 
 ---
 
-## 九、Critic 扩展指标
+## 十、Critic 扩展指标
 
 ### Gate A：结构完整性
 任何正文在进入内容审核前，必须先验证：
@@ -289,3 +331,83 @@ Critic + Guard + 人工终审
 3. **将 Writer 改为 skeleton → expansion 双阶段**
 4. **增加 chapter assembly 与 chapter-level critic**
 5. **为技能层补充 novel-novelize 能力**
+
+
+---
+
+## 十一、Orchestrator 读取的 Runtime Contract
+
+`runtime.yaml` 至少包含以下三段：
+
+```yaml
+narrative_state:
+  current_arc: 第一卷·入局
+  current_chapter: 5
+  current_scene: 2
+  pov_character: 林渊
+  active_characters:
+    - 林渊
+    - 顾长歌
+  emotional_target: 压迫+试探
+  narrative_function: 关系试探+信息误导
+  open_loops:
+    - 顾长歌真实立场
+  reveal_constraints:
+    must_not_reveal:
+      - 幕后组织
+    can_hint:
+      - 顾长歌不完全可信
+
+task:
+  task_id: scene-05-02
+  task_type: scene_generation
+  input_refs:
+    chapter_plan_id: chapter-01-05
+    scene_beat_id: scene-01-05-02
+  requirements:
+    min_length: 900
+    max_length: 1500
+    must_include:
+      - 环境压迫感
+      - 林渊的内心误判
+    must_avoid:
+      - 信息直接解释
+      - 总结式句子
+
+runtime:
+  stage: drafting
+  auto_flow: true
+  allow_replan: true
+  retry_policy:
+    max_retry: 2
+    escalate_on_fail: replan_scene
+  human_gate:
+    require_approval: false
+    approval_type: null
+  next_action_hint: call_writer
+```
+
+要求：
+
+1. Writer、Critic、Archivist 都必须显式引用 `runtime.yaml` 中的相关字段工作。
+2. Orchestrator 只根据 `runtime.stage` 与结构化输出推进，不再依赖隐式 prompt 理解。
+3. 任何缺少 `narrative_state` / `task` / `runtime` 任一主段的执行请求，默认回退到 bootstrap 或人工澄清。
+
+
+---
+
+## 十二、Briefing / Bootstrap 的验证门槛
+
+只有同时满足以下条件，才建议把前台能力升级为新的 Room Agents：
+
+1. **准入完整率**：进入中台前，`runtime.yaml` 缺关键字段的比例显著下降。
+2. **误启动率下降**：因信息不足导致的重规划 / 返工明显减少。
+3. **人工澄清轮次下降**：作者在进入中台前的额外补问轮次减少。
+4. **吞吐可接受**：增加 preflight 后，总体交付延迟没有不可接受地上升。
+5. **职责边界稳定**：它们与 Orchestrator、Architect 的边界已经在真实项目中收敛。
+
+建议先跑三类 workload：
+
+- **冷启动立项**：作者只有模糊 idea，测试 briefing 是否真能补齐关键信息。
+- **中途插单任务**：已有项目中临时追加 scene / chapter 任务，测试 bootstrap 是否能稳定生成 task contract。
+- **高约束返工**：已有 baseline 与 canon 锁死，测试 preflight 是否会多此一举或错误覆盖既有状态。
