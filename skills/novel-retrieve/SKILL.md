@@ -25,86 +25,33 @@ metadata:
 - 需要查找某个角色的历史行为
 - 需要召回相关的伏笔
 - 需要获取特定时间点的状态
-
-## 检索类型
-
-### 1. 角色检索
-
-```
-输入: 角色名 + 查询意图
-输出: 角色的相关上下文
-```
-
-**示例查询：**
-- "林小羽之前做过哪些主动的行为？"
-- "李明对林小羽的看法有什么变化？"
-- "这个角色上次出现是什么时候？"
-
-### 2. 伏笔检索
-
-```
-输入: 伏笔ID 或 关键词
-输出: 伏笔的完整信息 + 当前状态
-```
-
-**示例查询：**
-- "有哪些伏笔还没回收？"
-- "和'熟练'相关的伏笔有哪些？"
-- "第1章埋的伏笔现在到什么阶段了？"
-
-### 3. 场景检索
-
-```
-输入: 场景特征
-输出: 相关场景的摘要
-```
-
-**示例查询：**
-- "之前在图书馆的场景有哪些？"
-- "两人独处的场景有哪些？"
-- "上次男主落荒而逃是什么时候？"
-
-### 4. 时间线检索
-
-```
-输入: 时间锚点 或 章节范围
-输出: 时间线上的事件序列
-```
-
-**示例查询：**
-- "第1卷的事件时间顺序是什么？"
-- "最近3章发生了什么？"
-
-### 5. 文风检索
-
-```
-输入: 文风特征
-输出: 参考段落
-```
-
-**示例查询：**
-- "之前内心OS比较多的段落有哪些？"
-- "上次写吻戏的风格是什么样的？"
+- 需要给 `prose_director` / `writer` 组装上下文包
 
 ## 检索来源
 
 ### 固定层（始终可查）
 - `projects/{{novel_id}}/workspace/canon/bible.md` - 核心设定
+- `projects/{{novel_id}}/workspace/canon/style/` - 风格模板
 - `projects/{{novel_id}}/workspace/canon/characters/` - 角色基础设定
+- `projects/{{novel_id}}/workspace/plans/scene/` - 当前 Scene Beats
+- `projects/{{novel_id}}/workspace/plans/prose/` - 当前 Prose Brief
 
 ### 动态状态层
 - `projects/{{novel_id}}/workspace/states/characters/*.md` - 角色动态状态
 - `projects/{{novel_id}}/workspace/states/timeline/index.md` - 时间线
 - `projects/{{novel_id}}/workspace/states/open_loops/index.md` - 伏笔表
+- `projects/{{novel_id}}/workspace/manifests/character_constraints/` - 角色约束
 
 ### 内容层
 - `projects/{{novel_id}}/workspace/summaries/chapter-*.md` - 章节摘要
 - `projects/{{novel_id}}/workspace/drafts/scenes/draft-*.md` - 草稿正文
+- `projects/{{novel_id}}/workspace/drafts/bridges/*.md` - 过桥稿
+- `projects/{{novel_id}}/workspace/reviews/review-*.md` - 历史评审
 
 ## 四层检索策略
 
 ### Layer 1: 精确匹配
-- 角色名、章节号、伏笔ID
+- 角色名、章节号、伏笔ID、scene_id
 
 ### Layer 2: 语义检索
 - 意图理解 + 相关召回
@@ -113,36 +60,16 @@ metadata:
 - 最近的N章/N个场景
 
 ### Layer 4: 关系网络
-- 同一场景/同一地点/同一角色
+- 同一场景/同一地点/同一角色/同一开放循环
 
-## 检索示例
+## 输出要求
 
-### 示例1: 写表白场景前的准备
-
-```
-问题: 写表白场景前，需要召回之前所有暗示感情的场景
-
-检索:
-1. projects/{{novel_id}}/workspace/states/characters/林小羽.md - 查看她对男主的态度变化
-2. projects/{{novel_id}}/workspace/states/characters/李明.md - 查看他对林小羽的态度变化
-3. projects/{{novel_id}}/workspace/states/open_loops/index.md - 看看有哪些伏笔可以回收
-4. projects/{{novel_id}}/workspace/summaries/chapter-*.md - 快速浏览之前章节的甜度曲线
-```
-
-### 示例2: 检查角色OOC
-
-```
-问题: 写林小羽突然冷漠，需要确认这是否符合人设
-
-检索:
-1. projects/{{novel_id}}/workspace/canon/characters/林小羽.md - 基础性格设定
-2. projects/{{novel_id}}/workspace/states/characters/林小羽.md - 最近的动态
-3. projects/{{novel_id}}/workspace/drafts/scenes/ - 最近3个场景中她的表现
-```
+- 优先返回当前任务真正需要的最小上下文包
+- 明确标出来源文件
+- 若召回内容跨章节或跨时间跨度较大，要提示调用方注意边界
 
 ## 注意事项
 
-1. **优先精确**: 先精确匹配，再扩大范围
-2. **分层返回**: 按"固定→动态→内容"的顺序返回
-3. **控制数量**: 单次检索不超过10条相关内容
-4. **标记来源**: 返回结果要标注来自哪个文件
+1. 默认禁止跨 `novel_id` 检索。
+2. `writer` 与 `prose_director` 优先拿“当前 Scene 必需上下文”，不要把整本书一次性灌入上下文。
+3. 若检索结果和当前 Beat / Prose Brief 冲突，应优先交给 `critic` / `architect` 判断，而不是擅自覆盖现有产物。

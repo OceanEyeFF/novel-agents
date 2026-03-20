@@ -1,6 +1,6 @@
 ---
 name: novel-draft
-description: 小说创作辅助 - 场景续写、风格参考、过渡生成。
+description: 小说创作辅助 - 场景 skeleton、prose expansion、桥接段生成与续写支持。
 metadata:
   {
     "openclaw":
@@ -13,7 +13,7 @@ metadata:
 
 # novel-draft
 
-小说创作辅助工具，帮助 Writer Agent 更好地完成场景写作。
+小说创作辅助工具，帮助 Writer Agent 完成 skeleton、expansion 和 bridge 三类写作任务。
 
 > 执行前提：必须先锁定 `novel_id`，正文读写和续写参考只能来自 `projects/{{novel_id}}/workspace/`。
 
@@ -21,103 +21,89 @@ metadata:
 
 ✅ **USE this skill when:**
 
-- 需要续写下一个段落但卡住了
-- 需要生成两个场景之间的过渡
-- 需要参考前文的风格
-- 需要快速生成对话/描写
+- 需要先写一版结构正确的 scene skeleton
+- 需要在不改剧情事实的前提下做 prose expansion
+- 需要生成相邻 Scene 之间的过桥 / 余波 / 呼吸段
+- 需要参考前文风格、人物状态和 prose brief
+
+## 三种模式
+
+### 1. Skeleton Draft
+
+目标：先把事件顺序、信息揭示、情绪方向写正确。
+
+**输入至少包括：**
+- 当前 Scene Beat
+- 当前 Prose Brief
+- 当前角色状态
+- `must_not_include` / `hidden_information`
+
+### 2. Prose Expansion
+
+目标：在不改变结构功能的前提下补足：
+- 环境锚点
+- 身体感受
+- 内心活动
+- 潜台词
+- 段落节奏变化
+
+### 3. Bridge Draft
+
+目标：只负责两个相邻 Scene 间的过桥。
+
+**禁止：**
+- 发明新的主事件
+- 偷偷推进未批准的剧情
+- 合并两个 Scene 的核心情节到一个文件
 
 ## 常用操作
 
-### 1. 续写当前场景
-
-提供以下信息让模型续写：
-- 当前最后一段正文
-- 下一句应该发生的剧情点
-- 角色当前情绪状态
-- 文风要求
-
-### 2. 风格参考
-
-获取前文的风格特征：
+### 读取当前 Scene Beat
 
 ```bash
-# 读取最近写的内容作为参考
-read: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{卷}}-{{章}}-{{序号}}.md
-
-# 参考前面2-3段的风格
-# 关键指标：
-# - 平均句长
-# - 比喻密度
-# - 对话/描写比例
-# - 内心OS频率
+read: projects/{{novel_id}}/workspace/plans/scene/scene-{{ID}}.md
 ```
 
-### 3. 过渡生成
+### 读取当前 Prose Brief
 
-生成两个场景/章节之间的过渡：
-
-```
-输入：
-- 上一场景结尾状态
-- 下一场景开头状态
-- 过渡类型：时间跳转/地点跳转/情节跳跃
-
-输出：
-- 1-2段过渡文字
+```bash
+read: projects/{{novel_id}}/workspace/plans/prose/prose-{{ID}}.md
 ```
 
-### 4. 对话生成
+### 读取角色状态
 
-为指定场景生成对话：
-
+```bash
+read: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
 ```
-输入：
-- 参与角色
-- 角色当前状态
-- 对话目标
-- 角色关系
 
-输出：
-- 符合人设的对话
+### 读取最近正文作为风格参考
+
+```bash
+read: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{ID}}.md
+```
+
+### 写场景草稿
+
+```bash
+write: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{ID}}.md
+```
+
+### 写桥接草稿
+
+```bash
+write: projects/{{novel_id}}/workspace/drafts/bridges/bridge-{{ID-A}}-{{ID-B}}.md
 ```
 
 ## Writer 工作流
 
-### 完整流程
-
-1. **获取上下文**
-   ```bash
-   # 读取当前 scene beats
-   read: projects/{{novel_id}}/workspace/plans/scene/scene-{{ID}}.md
-   
-   # 读取角色状态
-   read: projects/{{novel_id}}/workspace/states/characters/{{角色名}}.md
-   
-   # 读取上一段正文（如果有）
-   read: projects/{{novel_id}}/workspace/drafts/scenes/draft-{{ID}}.md
-   ```
-
-2. **开始写作**
-   - 根据 scene beats 的目标来写
-   - 保持角色状态一致
-   - 控制节奏
-
-3. **写完后自检**
-   - 对照 scene beats 检查是否达成目标
-   - 检查 OOC
-   - 检查字数是否在预算内
-
-## 字数控制参考
-
-| 场景类型 | 推荐字数 |
-|----------|----------|
-| 日常/过渡 | 500-800 |
-| 对话为主 | 800-1200 |
-| 事件/冲突 | 1200-1500 |
-| 高潮 | 1500-2000 |
+1. 读取 Scene Beat + Prose Brief + 角色状态。
+2. 先写 skeleton，确认事件与边界正确。
+3. 再做 expansion，补足小说性与密度。
+4. 如相邻 Scene 有拼接感，再补 bridge。
+5. 写完后交给 `novel-guard` / `novel-verify`。
 
 ## 注意事项
 
-1. **续写不是代笔**: 提供思路和参考，让 Writer 自己写出完整内容
-2. **风格一致**: 续写内容必须与前文风格保持一致
-3. **符合人设**: 对话和行动必须符合角色当前状态
+1. `novel-draft` 是写作辅助，不是绕过 Beat / Prose Brief 的自由发挥许可。
+2. expansion 不能改写结构事实。
+3. bridge 只能连接相邻 Scene，不能替代章节组装。
