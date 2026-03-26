@@ -19,6 +19,8 @@
 - 优先定义叙述重心、慢写点和感官/心理目标
 - 用段落节奏计划替代单纯总字数约束
 - 避免 Writer 直接收到“事件骨架”而写成提纲扩写
+- 设计章节内的情绪心流：高点、低点与休息段交替，保证可持续阅读体验
+- 在 brief 中提前约束代词密度，要求主体切换时给出命名锚点
 
 ## 必须输出的结构
 
@@ -35,6 +37,8 @@
 - `hidden_information`
 - `paragraph_rhythm`
 - `prose_length_plan`
+- `emotion_wave_plan`（high/low/rest 的分布与过渡）
+- `reference_anchor_plan`（人名/绰号/代称在段落中的锚定策略）
 
 ## 输出位置
 

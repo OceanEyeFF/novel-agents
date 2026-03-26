@@ -10,6 +10,7 @@
 | **architect** | 架构师 | 维护全书弧光、卷纲、章纲 |
 | **character-director** | 角色导演 | 维护角色状态机、追踪角色动态 |
 | **scene-planner** | 场景策划 | 把章纲拆成 Scene Beats |
+| **walk-on-director** | 路人导演 | 根据剧情缺口补充路人/一次性配角人设 |
 | **prose-director** | 小说导演 | 把 Scene Beats 翻译成小说表达方案 |
 | **writer** | 写手 | 按 prose brief 完成 skeleton + expansion |
 | **critic** | 审稿 | 检查结构错误、OOC、Canon 冲突、文本密度 |
@@ -24,7 +25,7 @@
 | **briefing** | 立项澄清 | 对话式归纳已确认/未确认信息，判断是否具备准入条件 |
 | **bootstrap** | 启动包转换 | 把 intake summary 转成 `project.yaml` 与 `runtime.yaml`，形成状态契约 |
 
-在它们通过真实工作负载测试前，默认仍以现有 8 个执行层 Agent 作为核心房间编制。
+在它们通过真实工作负载测试前，默认仍以现有 9 个执行层 Agent 作为核心房间编制。
 
 ## 🧰 Skills 组成
 
