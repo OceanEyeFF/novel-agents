@@ -387,6 +387,7 @@ runtime:
   stage: drafting
   auto_flow: true
   allow_replan: true
+  allow_simulation: true
   retry_policy:
     max_retry: 2
     escalate_on_fail: replan_scene
@@ -394,6 +395,13 @@ runtime:
     require_approval: false
     approval_type: null
   next_action_hint: call_writer
+  rollback:
+    requested: false
+    trigger: null
+    target_chapter: null
+    target_scene: null
+    target_stage: null
+    reason: null
 ```
 
 要求：
@@ -401,6 +409,10 @@ runtime:
 1. Writer、Critic、Archivist 都必须显式引用 `runtime.yaml` 中的相关字段工作。
 2. Orchestrator 只根据 `runtime.stage` 与结构化输出推进，不再依赖隐式 prompt 理解。
 3. 任何缺少 `narrative_state` / `task` / `runtime` 任一主段的执行请求，默认回退到 bootstrap 或人工澄清。
+4. 当 `runtime.rollback.requested = true` 时，Orchestrator 必须先进入回退流程，再恢复常规状态机推进。
+5. 当 `required_action` 为 `run_dialogue_simulation` / `run_event_simulation` 时，必须先产出模拟结果并完成 review，再决定是否写回计划。
+
+补充：模拟推演输出应进入 `simulations/`，并仅将结构结论写回 `plans/`，禁止将模拟文本直接当作正文归档。
 
 
 ---

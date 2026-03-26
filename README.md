@@ -149,8 +149,10 @@ projects/
 → Architect 创建/修订章纲
 → Scene Planner 生成 scene beats
 → Prose Director 生成 prose brief
+→ （可选）Orchestrator 发起小范围对话/事件模拟推演
 → Writer 先写 skeleton，再做 prose expansion
 → Critic 先做结构闸门，再做 scene-level critic
+→ （如 Human 指定）Orchestrator 回退到指定章节阶段并冻结后续任务重跑
 → Orchestrator 执行 chapter assembly / chapter-level critic
 → Archivist 仅归档“已批准且元信息完整”的稿件
 → Release Manager/CI 发布已验证技能版本到 clawskills.sh
