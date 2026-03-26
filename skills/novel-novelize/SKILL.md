@@ -52,6 +52,8 @@ description: 生成 Prose Brief，并在不改剧情事实的前提下做小说�
 - `hidden_information`
 - `paragraph_rhythm`
 - `prose_length_plan`
+- `emotion_wave_plan`
+- `reference_anchor_plan`
 
 ## Expansion rules
 
@@ -63,6 +65,7 @@ description: 生成 Prose Brief，并在不改剧情事实的前提下做小说�
 - dialogue subtext
 - pacing pauses and aftershocks
 - texture details that increase presence
+- subject anchors (name / nickname / role-title) for POV switches
 
 **Do not:**
 

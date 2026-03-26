@@ -111,6 +111,8 @@ route_rules:
     then: architect
   - if: missing_scene_beats
     then: scene_planner
+  - if: missing_walk_on_cast and scene_requires_walk_on
+    then: walk_on_director
   - if: missing_prose_brief
     then: prose_director
   - if: critic.required_action == fix_local_language
@@ -217,6 +219,8 @@ required_fields:
   - exit_state
   - must_include
   - must_not_include
+  - emotional_beat_type
+  - emotional_transition_note
 
 deny:
   - drafts/*
@@ -226,7 +230,41 @@ deny:
 
 ---
 
-## 4. Prose Director（小说导演）
+## 4. Walk-on Director（路人导演）
+
+```yaml
+name: walk_on_director
+role: 路人导演
+description: 根据剧情缺口补充路人/一次性配角人设，避免工具人化与临场硬造
+
+read:
+  - plans/scene/current
+  - plans/prose/current
+  - manifests/character_constraints/*
+  - states/characters/current
+
+write:
+  - manifests/walk_on_cast/*
+
+required_fields:
+  - walk_on_id
+  - scene_id
+  - role_function
+  - public_identity
+  - hidden_motive
+  - voice_style
+  - interaction_boundary
+  - exit_trigger
+
+deny:
+  - drafts/*
+  - plans/chapter/*
+  - canon/*
+```
+
+---
+
+## 5. Prose Director（小说导演）
 
 ```yaml
 name: prose_director
@@ -255,6 +293,8 @@ required_fields:
   - hidden_information
   - paragraph_rhythm
   - prose_length_plan
+  - emotion_wave_plan
+  - reference_anchor_plan
 
 deny:
   - drafts/*
@@ -264,7 +304,7 @@ deny:
 
 ---
 
-## 5. Writer（正文写手）
+## 6. Writer（正文写手）
 
 ```yaml
 name: writer
@@ -296,7 +336,7 @@ deny:
 
 ---
 
-## 6. Critic（批评审校）
+## 7. Critic（批评审校）
 
 ```yaml
 name: critic
@@ -321,6 +361,8 @@ required_scores:
   - scene_density
   - novelness
   - chapter_cohesion
+  - emotion_wave_health
+  - reference_clarity
   - decision
   - required_action
 
@@ -350,7 +392,7 @@ deny:
 
 ---
 
-## 7. Archivist（档案官）
+## 8. Archivist（档案官）
 
 ```yaml
 name: archivist

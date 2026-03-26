@@ -59,7 +59,7 @@ intake_summary:
 
 ---
 
-## 三、8 Agent 执行层结构
+## 三、9 Agent 执行层结构
 
 ### 1. Orchestrator（调度员，主控）
 - 常驻中心管理 Agent，负责状态机推进
@@ -82,23 +82,30 @@ intake_summary:
 - 把章纲拆成 scene beats
 - 负责 scene sequencing、entry/exit state、隐藏信息边界
 - 输出不再只强调事件功能，还要为 prose 层提供可转译骨架
+- 负责章节情绪波形初版（high/low/transition/rest），避免全程单一情绪
 
-### 5. Prose Director（小说导演）
+### 5. Walk-on Director（路人导演）
+- 根据剧情缺口自动生成路人/一次性配角轻量人设卡
+- 保证路人有最小动机与离场条件，避免工具人化
+- 只写 `manifests/walk_on_cast`，不直接改正文
+
+### 6. Prose Director（小说导演）
 - 把 scene beat 翻译成 **小说表达方案（prose brief）**
 - 指定叙述重心、慢写点、感官目标、内心活动点、对话功能、段落节奏
+- 补充代词锚定策略，减少“他/她”连续链造成的主体漂移
 - 不改剧情，不直接写最终正文
 
-### 6. Writer（正文写手）
+### 7. Writer（正文写手）
 - 按已批准的 prose brief 生成正文
 - 采用两阶段：`skeleton draft` → `prose expansion`
 - 不得擅自改 canon、章纲或状态层
 
-### 7. Critic（批评审校）
+### 8. Critic（批评审校）
 - 先检查结构闸门，再检查逻辑、节奏、OOC、设定冲突
 - 新增文本质量维度：**Scene Density / Novelness / Chapter Cohesion**
 - 输出结构化返工建议，供 Orchestrator 自动路由
 
-### 8. Archivist（档案官）
+### 9. Archivist（档案官）
 - 场景结束后更新状态层
 - 写摘要、更新时间线/伏笔表/角色状态表
 - 保存草稿版本、审批链与快照索引
@@ -181,6 +188,8 @@ Orchestrator 必须根据 `required_action` 把任务回退到正确层级，而
 - `hidden_information`
 - `paragraph_rhythm`
 - `prose_length_plan`
+- `emotion_wave_plan`
+- `reference_anchor_plan`
 
 ### 段落级预算替代总 Token Budget
 

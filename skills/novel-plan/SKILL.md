@@ -85,6 +85,8 @@ projects/{{novel_id}}/workspace/plans/
 | 退出状态 | 角色退出状态 |
 | Must Include | 本场必须出现的信息 / 动作 |
 | Must Not Include | 明确禁止写入的跨章信息 |
+| Emotional Beat Type | high / low / transition / rest |
+| Emotional Transition Note | 与前后场情绪过渡说明 |
 
 ## 规划流程
 
@@ -101,3 +103,4 @@ projects/{{novel_id}}/workspace/plans/
 - [ ] Scene beats 已创建
 - [ ] `sequence_index` 连续无跳号
 - [ ] `must_not_include` 已写明边界
+- [ ] 情绪类型分布不是单一“全高压/全高糖”

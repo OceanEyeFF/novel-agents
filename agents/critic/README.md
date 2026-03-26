@@ -50,6 +50,8 @@
 - `novelness`
 - `chapter_cohesion`
 - `script_like_risk`
+- `emotion_wave_health`（情绪曲线健康度）
+- `reference_clarity`（人物指代清晰度）
 
 ## 剧本化高风险判定
 
@@ -73,6 +75,8 @@
 3. 一个文件同时承担正文、章节摘要、下章预告三种功能。
 4. 发现 Writer 使用了未在 Beat / Prose Brief 中声明的跨章跳转。
 5. `script_like_risk = high` 且未补齐环境锚点、身体感受、慢写点等修复项。
+6. 连续多个场景均为同类型高压/高糖，且缺失休息或过渡段。
+7. 单段出现连续多句“他/她/他们”导致主体不明。
 
 ## 输出要求
 
@@ -85,6 +89,8 @@
 - `novelness`
 - `chapter_cohesion`
 - `script_like_risk`
+- `emotion_wave_health`
+- `reference_clarity`
 - `decision`
 - `blocking_issues`
 - `required_action`
