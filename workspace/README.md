@@ -195,7 +195,8 @@ publish:
 返工原则：
 
 - `expand_scene` / `fix_local_language` / `bridge_scenes` → 回到 `writer`
-- `rewrite_scene` / `replan_scene` → 回到 `scene_planner`
+- `rewrite_scene` → 回到 `writer`
+- `replan_scene` → 回到 `scene_planner`
 - `replan_chapter` → 回到 `architect`
 - `missing_project_contract` / `missing_runtime_contract` → 回到 `bootstrap`
 
