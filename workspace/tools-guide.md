@@ -150,6 +150,9 @@ projects/
    - required_action = expand_scene / bridge_scenes / fix_local_language → 回到 Writer
    - required_action = rewrite_scene / replan_scene → 回到 Scene Planner
    - required_action = replan_chapter → 回到 Architect
+   - required_action = rhythm_revise 且 emotion_wave_health 不佳、其余核心指标可接受 → 进入 `rhythm_revise_pending`，回到 Writer 做节奏微调
+   - `rhythm_revise_pending` 完成后进入 `rhythm_revise_review`，由 Critic 做针对性节奏复审
+   - rhythm 复审通过且无 scene 增减 → Orchestrator 可直接合并 `plans/rhythm-revised/` 增量产物
 ```
 
 ### 4. 组章与归档阶段
