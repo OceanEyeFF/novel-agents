@@ -19,7 +19,7 @@
 - 不等待人工逐步推进常规流程
 - 优先依据状态机而不是主观判断决定下一步
 - Critic 给出 `required_action` 后，必须回退到正确层级
-- Human 明确提出“回退到某章节某阶段重做”时，优先执行显式回退指令
+- Human 明确提出"回退到某章节某阶段重做"时，优先执行显式回退指令
 - 只有高风险节点才升级人工
 - 缺少契约时优先路由到 `briefing` / `bootstrap`
 
@@ -36,6 +36,8 @@
 - `review_failed_major`
 - `replan_required`
 - `rollback_requested`
+- `rhythm_revise_pending`
+- `rhythm_revise_review`
 - `simulation_pending`
 - `simulation_review`
 - `scene_approved`
@@ -54,17 +56,72 @@
 - `required_action = replan_scene` → `scene_planner`
 - `required_action = replan_chapter` → `architect`
 - `required_action = run_dialogue_simulation / run_event_simulation` → `scene_planner`（必要时协同 `character_director`）
+- `required_action = rhythm_revise` 且 emotion_wave_health 不佳但其他指标尚可 → `writer`（rhythm revision 分支）
+- `rhythm_revise_pending` 完成后 → `critic`（针对性节奏审查）
+- Critic rhythm 审查通过且无 scene 增减 → `orchestrator`（直接合并rhythm-revised 到主产物）
 
-## Human 回退机制（新增）
+## 增量节奏重写机制（Rhythm Revision）
 
-当 Human 指令里出现“回到某章节某阶段重做”时，Orchestrator 必须进入 `rollback_requested`，并按以下顺序执行：
+用于在章纲或 Scene Beats 已批准、 Writer 草稿已出的情况下，只针对节奏层面做精准微调，不触发全流程回退。
+
+**触发条件（须同时满足）：**
+- Human 明确要求"节奏重写"、"情绪调整"、"波形修整"
+- Critic 报告 `emotion_wave_health` 不佳，但 `scene_density` / `novelness` / `chapter_cohesion` 均在可接受范围
+- 问题的根源是"节奏/情绪分布"而非"结构/Canon/角色动机"
+
+**与 rollback 的区别：**
+
+| | Rollback | Rhythm Revision |
+|---|---|---|
+| 范围 | 全流程重做 | 仅节奏/情绪层 |
+| 起点 | 回退到指定 stage | 从当前产物继续 |
+| 产物 | 替换原版本 | 保留原版本，增量生成 `rhythm-revised/` |
+| 风险 | 高（可能引入新问题） | 低（隔离修改） |
+| 适用 | 结构性问题、Canon 冲突 | 节奏拖沓、情绪平铺、高压/低糖连续 |
+
+**执行流程：**
+
+1. **解析目标**
+   - `target_chapter`
+   - `target_scene`（可选，单场景或全章）
+   - `rhythm_issue`（如 `high_emotion_continuous`、`missing_rest_point`、`pacing_flat`）
+   - `iteration_reference`（基于哪个已批准版本：`chapter-approved` / `beat-approved` / `draft-vN`）
+2. **创建隔离工作目录** `plans/rhythm-revised/chapter-{N}/` 或 `plans/scene-rhythm/scene-{M}/`
+3. **路由到 Writer**，附带：
+   - 原产物路径（只读）
+   - `rhythm_issue` 描述
+   - 约束：不得改变 scene_goal / conflict / canon 事实，只能调整：
+     - 情绪波形中的 `rest` / `transition` 分布
+     - 场景出场顺序（仅在同一 chapter 内）
+     - 桥接段密度
+     - 单 scene 内 action vs. reflection 的比例
+4. **Writer 输出** `rhythm-revised/` 版本后，路由到 Critic 做针对性审查（重点：`emotion_wave_health`、`chapter_cohesion`）
+5. **通过后**：由 Human 或 Architect（若涉及 scene 增减）最终决定是否将修订版并入主产物；若仅节奏调整，可由 Orchestrator 直接合并
+
+**状态机变化：**
+- 新增 `rhythm_revise_pending`：等待 Writer 执行节奏修订
+- 新增 `rhythm_revise_review`：节奏修订完成，等待 Critic 审查
+- 不改变原有 stage，只在原 stage 上叠加 rhythm_revise 分支
+
+**输出要求：**
+- 每次 rhythm revision 必须记录：
+  - `rhythm_issue` 描述
+  - 改了什么（情绪点移动 / 场景重排 / 桥接段增减）
+  - 理由
+  - Critic `emotion_wave_health` 前后对比
+
+---
+
+## Human 回退机制（Rollback）
+
+当 Human 指令里出现"回到某章节某阶段重做"时，Orchestrator 必须进入 `rollback_requested`，并按以下顺序执行：
 
 1. 解析目标：
    - `target_chapter`
    - `target_scene`（可选）
    - `target_stage`（如 `planned` / `beat_ready` / `prose_ready` / `drafting`）
    - `reason`
-2. 写入回退单 `jobs/rollback-*.yaml`，记录“从哪里回退、回到哪里、由谁触发”。
+2. 写入回退单 `jobs/rollback-*.yaml`，记录"从哪里回退、回到哪里、由谁触发"。
 3. 冻结当前及后续依赖任务（避免旧版本继续被组章）。
 4. 路由到目标阶段对应 Agent：
    - `planned` → `architect`
@@ -73,14 +130,14 @@
    - `drafting` → `writer`
 5. 回退重做完成并通过 Critic 后，再解除冻结并恢复主流程。
 
-若 Human 只给了模糊描述（例如“往前退一点重写”），必须先发起澄清，不得擅自猜测目标 stage。
+若 Human 只给了模糊描述（例如"往前退一点重写"），必须先发起澄清，不得擅自猜测目标 stage。
 
 ## 模拟推演机制（新增）
 
-用于在正式写作前做“小范围剧情试跑”，降低结构性返工。
+用于在正式写作前做"小范围剧情试跑"，降低结构性返工。
 
 - 触发条件（任一满足即可）：
-  - Human 明确要求“模拟对话 / 推演事件发展”
+  - Human 明确要求"模拟对话 / 推演事件发展"
   - Critic 标记关系动机不稳、冲突链条不闭合
   - 关键角色首次同场且信息不对称高
 - 执行状态：
@@ -91,7 +148,7 @@
   - `simulations/event-*.md`：事件分支推演（触发条件、分支结果、风险点）
   - `simulations/decision-*.yaml`：是否回写到 chapter/scene plan 的决策
 - 回写规则：
-  - 仅允许把“结构结论”写回 `plans/` 与 `manifests/`
+  - 仅允许把"结构结论"写回 `plans/` 与 `manifests/`
   - 禁止直接把模拟文本当正文归档
   - 需记录采用/放弃某分支的理由，供后续审计
 
