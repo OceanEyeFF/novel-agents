@@ -126,8 +126,11 @@ publish:
 
 ### 3. 审核与组章阶段
 1. `critic` 先执行 Gate A（结构完整性），再执行 Gate B（内容质量）与 Gate C（小说性评分） → `projects/{{novel_id}}/workspace/reviews/`。
-2. `orchestrator` 根据 `required_action` 决定是 `expand_scene`、`rewrite_scene`、`bridge_scenes`、`replan_scene` 还是 `replan_chapter`。
-3. Scene 全部通过后，`orchestrator` 进入 `chapter_assembling`，组织章节过桥、余波段和章节级连贯性检查。
+2. `orchestrator` 根据 `required_action` 决定是 `expand_scene`、`rewrite_scene`、`bridge_scenes`、`replan_scene`、`replan_chapter` 或 `rhythm_revise`。
+3. 当 `required_action = rhythm_revise` 且 `emotion_wave_health` 不佳但其余指标可接受时，进入 `rhythm_revise_pending`，由 `writer` 仅做节奏/情绪波形微调，不改 canon 与 scene_goal。
+4. `writer` 产出 `rhythm-revised/` 后进入 `rhythm_revise_review`，由 `critic` 做针对性复审（重点 `emotion_wave_health` / `chapter_cohesion`）。
+5. rhythm 复审通过且无 scene 增减时，可由 `orchestrator` 直接合并增量结果；若涉及 scene 结构变化，则升级给 `architect` / Human 决策。
+6. Scene 全部通过后，`orchestrator` 进入 `chapter_assembling`，组织章节过桥、余波段和章节级连贯性检查。
 
 ### 4. 归档阶段
 1. `archivist` 在 `decision = approved` 且 `gate_a_result = pass` 后更新 `states/`。

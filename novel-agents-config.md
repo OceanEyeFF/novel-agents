@@ -97,6 +97,11 @@ state_machine:
   - review_failed_minor
   - review_failed_major
   - replan_required
+  - rollback_requested
+  - rhythm_revise_pending
+  - rhythm_revise_review
+  - simulation_pending
+  - simulation_review
   - scene_approved
   - chapter_assembling
   - chapter_approved
@@ -127,6 +132,12 @@ route_rules:
     then: scene_planner
   - if: critic.required_action == replan_chapter
     then: architect
+  - if: critic.required_action == rhythm_revise and critic.emotion_wave_health == fail and critic.scene_density != fail and critic.novelness != fail and critic.chapter_cohesion != fail
+    then: writer
+  - if: runtime.stage == rhythm_revise_pending
+    then: writer
+  - if: runtime.stage == rhythm_revise_review
+    then: critic
   - if: critic.required_action == escalate_human
     then: human_review
 
@@ -382,6 +393,7 @@ allow_required_action:
   - bridge_scenes
   - replan_scene
   - replan_chapter
+  - rhythm_revise
   - escalate_human
 
 deny:
